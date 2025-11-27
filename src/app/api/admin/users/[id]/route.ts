@@ -2,19 +2,19 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Admin from '@/models/Admin';
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         await dbConnect();
+        const { id } = await params;
         const { name, email, password } = await request.json();
 
         const updateData: any = { name, email };
         if (password) {
-            updateData.password = password; // Middleware/Pre-save hook should handle hashing if using save(), but findByIdAndUpdate bypasses pre-save.
-            // We need to fetch, update, and save to trigger hashing if password is changed.
+            updateData.password = password;
         }
 
         if (password) {
-            const admin = await Admin.findById(params.id);
+            const admin = await Admin.findById(id);
             if (!admin) {
                 return NextResponse.json({ error: 'Admin not found' }, { status: 404 });
             }
@@ -25,7 +25,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             return NextResponse.json({ message: 'Admin updated successfully', admin });
         } else {
             const admin = await Admin.findByIdAndUpdate(
-                params.id,
+                id,
                 { name, email },
                 { new: true }
             ).select('-password');
@@ -41,10 +41,11 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         await dbConnect();
-        const admin = await Admin.findByIdAndDelete(params.id);
+        const { id } = await params;
+        const admin = await Admin.findByIdAndDelete(id);
 
         if (!admin) {
             return NextResponse.json({ error: 'Admin not found' }, { status: 404 });
