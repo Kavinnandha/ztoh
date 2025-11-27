@@ -68,7 +68,7 @@ export default function AdminLogin() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-slate-900 placeholder:text-slate-400"
-                                    placeholder="admin@ztoh.org"
+                                    placeholder="Enter admin email"
                                 />
                             </div>
                         </div>
