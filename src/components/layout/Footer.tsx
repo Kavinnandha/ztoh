@@ -66,13 +66,13 @@ export default function Footer() {
                                 <div className="p-2 rounded-lg bg-slate-800 group-hover:bg-secondary/20 transition-colors">
                                     <MapPin size={18} className="text-secondary" />
                                 </div>
-                                <span className="text-sm text-slate-400 group-hover:text-white transition-colors">123 Education Lane, Tech City, TC 90210</span>
+                                <span className="text-sm text-slate-400 group-hover:text-white transition-colors">Zero to Hero Online and Home Tutoring Services, 9/13, Gandhi Rd, Periyar Nagar, Nehru Nagar West, East, Tamil Nadu 641014</span>
                             </li>
                             <li className="flex items-center gap-3 group">
                                 <div className="p-2 rounded-lg bg-slate-800 group-hover:bg-secondary/20 transition-colors">
                                     <Phone size={18} className="text-secondary" />
                                 </div>
-                                <span className="text-sm text-slate-400 group-hover:text-white transition-colors">+1 (555) 123-4567</span>
+                                <span className="text-sm text-slate-400 group-hover:text-white transition-colors">+91 95643 21000</span>
                             </li>
                             <li className="flex items-center gap-3 group">
                                 <div className="p-2 rounded-lg bg-slate-800 group-hover:bg-secondary/20 transition-colors">

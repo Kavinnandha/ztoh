@@ -33,9 +33,8 @@ export default function Header() {
         <header
             className={cn(
                 "fixed top-0 w-full z-50 transition-all duration-300",
-                scrolled
-                    ? "bg-white/80 backdrop-blur-md py-3"
-                    : "bg-transparent py-5"
+                scrolled ? "py-3" : "py-5",
+                isOpen ? "bg-white" : (scrolled ? "bg-white/80 backdrop-blur-md" : "bg-transparent")
             )}
         >
             <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
@@ -98,7 +97,7 @@ export default function Header() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="md:hidden bg-white shadow-xl border-t border-slate-100 overflow-hidden"
+                        className="md:hidden absolute top-full left-0 w-full bg-white shadow-xl border-t border-slate-100 overflow-hidden"
                     >
                         <nav className="flex flex-col p-6 gap-4">
                             {navLinks.map((link) => (

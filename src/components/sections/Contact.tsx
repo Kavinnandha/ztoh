@@ -90,7 +90,7 @@ export default function Contact() {
                         viewport={{ once: true }}
                         className="space-y-8"
                     >
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center hover:shadow-lg transition-shadow group">
                                 <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                                     <MapPin size={24} />
