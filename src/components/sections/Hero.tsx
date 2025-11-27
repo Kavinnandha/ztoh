@@ -56,7 +56,7 @@ export default function Hero() {
                         </motion.div>
 
                         <motion.h1 variants={fadeInUp} className="text-5xl md:text-6xl lg:text-7xl font-bold font-heading text-slate-900 leading-[1.1] mb-6 tracking-tight">
-                            From <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900">Zero</span> to{" "}
+                            Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900">Zero</span> to{" "}
                             <span className="relative inline-block">
                                 <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-secondary to-primary">Hero</span>
                                 <span className="absolute -bottom-2 left-0 w-full h-3 bg-secondary/20 -skew-x-12 -z-0" />
