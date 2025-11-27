@@ -61,6 +61,12 @@
   }
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+  /* Adjust based on header height */
+}
+
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;

@@ -85,7 +85,7 @@ export default function Footer() {
                 </div>
 
                 <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500">
-                    <p>&copy; {new Date().getFullYear()} Zero to Hero Academy. All rights reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} Zero to Hero. All rights reserved.</p>
                     <div className="flex gap-6">
                         <Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link>
                         <Link href="#" className="hover:text-white transition-colors">Terms of Service</Link>

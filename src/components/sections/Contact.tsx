@@ -2,8 +2,48 @@
 
 import { motion } from "framer-motion";
 import { MapPin, Mail, Phone, Send } from "lucide-react";
+import { useState } from "react";
 
 export default function Contact() {
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        message: ''
+    });
+    const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setFormData(prev => ({
+            ...prev,
+            [e.target.id]: e.target.value
+        }));
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setStatus('loading');
+
+        try {
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (response.ok) {
+                setStatus('success');
+                setFormData({ name: '', email: '', message: '' });
+                setTimeout(() => setStatus('idle'), 3000);
+            } else {
+                setStatus('error');
+            }
+        } catch (error) {
+            setStatus('error');
+        }
+    };
+
     return (
         <section id="contact" className="py-24 bg-slate-50 relative">
             {/* Background Decoration */}
@@ -105,16 +145,19 @@ export default function Contact() {
                         <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/10 rounded-bl-[100px] -mr-8 -mt-8 pointer-events-none" />
 
                         <h3 className="text-2xl font-bold text-slate-900 mb-8 relative z-10">Send Message</h3>
-                        <form className="space-y-6 relative z-10">
+                        <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label htmlFor="name" className="text-sm font-medium text-slate-700">Your Name</label>
                                     <input
                                         type="text"
                                         id="name"
+                                        value={formData.name}
+                                        onChange={handleChange}
                                         className="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                                        placeholder="John Doe"
+                                        placeholder="Enter your name"
                                         required
+                                        disabled={status === 'loading'}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -122,9 +165,12 @@ export default function Contact() {
                                     <input
                                         type="email"
                                         id="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
                                         className="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                                        placeholder="john@example.com"
+                                        placeholder="Enter your email"
                                         required
+                                        disabled={status === 'loading'}
                                     />
                                 </div>
                             </div>
@@ -134,19 +180,35 @@ export default function Contact() {
                                 <textarea
                                     id="message"
                                     rows={6}
+                                    value={formData.message}
+                                    onChange={handleChange}
                                     className="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
                                     placeholder="How can we help you?"
                                     required
+                                    disabled={status === 'loading'}
                                 ></textarea>
                             </div>
 
                             <button
                                 type="submit"
-                                className="w-full py-4 bg-gradient-to-r from-primary to-slate-800 text-white font-bold rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2"
+                                disabled={status === 'loading'}
+                                className="w-full py-4 bg-gradient-to-r from-primary to-slate-800 text-white font-bold rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                             >
-                                <Send size={20} />
-                                Send Message
+                                {status === 'loading' ? (
+                                    <span className="animate-pulse">Sending...</span>
+                                ) : (
+                                    <>
+                                        <Send size={20} />
+                                        Send Message
+                                    </>
+                                )}
                             </button>
+                            {status === 'success' && (
+                                <p className="text-green-600 text-center font-medium">Message sent successfully!</p>
+                            )}
+                            {status === 'error' && (
+                                <p className="text-red-600 text-center font-medium">Failed to send message. Please try again.</p>
+                            )}
                         </form>
                     </motion.div>
                 </div>

@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useJoinUsModal } from "@/components/providers/ModalProvider";
 
 export default function CallToAction() {
+    const { openJoinUsModal } = useJoinUsModal();
     return (
         <section id="contact" className="py-24 relative overflow-hidden">
             <div className="container mx-auto px-4 md:px-6 relative z-10">
@@ -60,19 +62,13 @@ export default function CallToAction() {
                             transition={{ delay: 0.3 }}
                             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
                         >
-                            <Link
-                                href="#"
+                            <button
+                                onClick={openJoinUsModal}
                                 className="group inline-flex items-center gap-2 px-8 py-4 bg-white text-primary font-bold text-lg rounded-2xl hover:bg-slate-50 transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1"
                             >
                                 Get Started Now
                                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                            </Link>
-                            <Link
-                                href="#"
-                                className="inline-flex items-center gap-2 px-8 py-4 bg-transparent border border-white/20 text-white font-semibold text-lg rounded-2xl hover:bg-white/10 transition-all duration-300"
-                            >
-                                Contact Support
-                            </Link>
+                            </button>
                         </motion.div>
                     </div>
                 </motion.div>

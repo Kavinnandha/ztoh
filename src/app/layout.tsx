@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { ModalProvider } from "@/components/providers/ModalProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -16,8 +17,8 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Zero to Hero Academy | Master Your Future",
-  description: "Join Zero to Hero Academy for top-tier tutoring and mentorship. Transform your potential into success with our expert-led courses.",
+  title: "Zero to Hero | ",
+  description: "Join Zero to Hero for top-tier tutoring and mentorship. Transform your potential into success with our expert-led courses.",
 };
 
 export default function RootLayout({
@@ -34,11 +35,13 @@ export default function RootLayout({
           plusJakarta.variable
         )}
       >
-        <Header />
-        <main className="flex-grow">
-          {children}
-        </main>
-        <Footer />
+        <ModalProvider>
+          <Header />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer />
+        </ModalProvider>
       </body>
     </html>
   );

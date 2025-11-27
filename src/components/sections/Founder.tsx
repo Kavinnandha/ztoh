@@ -15,7 +15,7 @@ export default function Founder() {
                         initial={{ opacity: 0, x: -20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
-                        className="w-full lg:w-1/3 sticky top-24"
+                        className="w-full lg:w-1/3 relative lg:sticky lg:top-24"
                     >
                         <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
                             <Image

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { useJoinUsModal } from "@/components/providers/ModalProvider";
 
 const navLinks = [
     { name: "Home", href: "/" },
@@ -18,6 +19,7 @@ const navLinks = [
 export default function Header() {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const { openJoinUsModal } = useJoinUsModal();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -32,13 +34,13 @@ export default function Header() {
             className={cn(
                 "fixed top-0 w-full z-50 transition-all duration-300",
                 scrolled
-                    ? "glass shadow-sm py-3"
+                    ? "bg-white/80 backdrop-blur-md py-3"
                     : "bg-transparent py-5"
             )}
         >
             <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-3 group">
-                    <div className="relative h-10 w-10 md:h-12 md:w-12 overflow-hidden rounded-full bg-gradient-to-br from-secondary/20 to-primary/20 flex items-center justify-center ring-2 ring-white/50 shadow-lg">
+                    <div className="relative h-10 w-10 md:h-12 md:w-12 overflow-hidden rounded-full flex items-center justify-center ring-2 ring-white/50 shadow-lg">
                         <Image
                             src="/ztoh-logo.png"
                             alt="Zero to Hero Logo"
@@ -53,7 +55,7 @@ export default function Header() {
                             ZERO TO HERO
                         </span>
                         <span className="text-[10px] md:text-xs font-bold text-secondary tracking-[0.2em] uppercase">
-                            Academy
+                            Learn With Confidence
                         </span>
                     </div>
                 </Link>
@@ -70,13 +72,13 @@ export default function Header() {
                             <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-secondary transition-all duration-300 group-hover:w-full" />
                         </Link>
                     ))}
-                    <Link
-                        href="#contact"
+                    <button
+                        onClick={openJoinUsModal}
                         className="relative px-6 py-2.5 bg-primary text-white text-sm font-bold rounded-full overflow-hidden group shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
                     >
                         <span className="relative z-10">Get Started</span>
                         <div className="absolute inset-0 bg-gradient-to-r from-secondary to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </Link>
+                    </button>
                 </nav>
 
                 {/* Mobile Menu Button */}
@@ -96,7 +98,7 @@ export default function Header() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="md:hidden glass border-t border-white/20 overflow-hidden"
+                        className="md:hidden bg-white shadow-xl border-t border-slate-100 overflow-hidden"
                     >
                         <nav className="flex flex-col p-6 gap-4">
                             {navLinks.map((link) => (
@@ -109,13 +111,15 @@ export default function Header() {
                                     {link.name}
                                 </Link>
                             ))}
-                            <Link
-                                href="#contact"
+                            <button
                                 className="w-full text-center px-5 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary/90 transition-colors mt-2"
-                                onClick={() => setIsOpen(false)}
+                                onClick={() => {
+                                    setIsOpen(false);
+                                    openJoinUsModal();
+                                }}
                             >
                                 Get Started
-                            </Link>
+                            </button>
                         </nav>
                     </motion.div>
                 )}
