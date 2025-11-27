@@ -153,41 +153,52 @@ export default function Services() {
                     </motion.p>
                 </div>
 
-                {/* Detailed Services Horizontal Scroll */}
-                <div className="relative mb-24 group">
-                    <div className="flex overflow-x-auto pb-8 gap-6 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
-                        {services.map((service, index) => (
-                            <motion.div
-                                key={index}
-                                initial={{ opacity: 0, x: 50 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: index * 0.1 }}
-                                className="snap-center shrink-0 w-[85vw] md:w-[400px] flex flex-col bg-white p-8 rounded-[2rem] shadow-lg shadow-slate-200/50 border border-slate-100 hover:shadow-xl hover:border-secondary/30 transition-all duration-300 h-[400px]"
-                            >
-                                <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-colors duration-300 shadow-inner mb-6">
-                                    {service.icon}
-                                </div>
-                                <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-primary transition-colors">{service.title}</h3>
-                                <div className="flex-grow overflow-hidden relative">
-                                    <p className="text-slate-600 leading-relaxed text-sm line-clamp-4">
-                                        {service.description}
-                                    </p>
-                                    <div className="absolute bottom-0 left-0 w-full h-8 bg-gradient-to-t from-white to-transparent" />
-                                </div>
-                                <button
+                {/* Detailed Services Carousel */}
+                <div className="relative mb-24 group overflow-hidden">
+                    <div className="flex gap-6">
+                        <motion.div
+                            className="flex gap-6"
+                            animate={{
+                                x: ["0%", "-50%"]
+                            }}
+                            transition={{
+                                x: {
+                                    repeat: Infinity,
+                                    repeatType: "loop",
+                                    duration: 40,
+                                    ease: "linear",
+                                },
+                            }}
+                        >
+                            {[...services, ...services].map((service, index) => (
+                                <div
+                                    key={index}
                                     onClick={() => setSelectedService(service)}
-                                    className="mt-4 flex items-center gap-2 text-primary font-semibold text-sm hover:gap-3 transition-all group/btn"
+                                    className="shrink-0 w-[85vw] md:w-[400px] flex flex-col bg-white p-8 rounded-[2rem] shadow-lg shadow-slate-200/50 border border-slate-100 hover:shadow-xl hover:border-secondary/30 transition-all duration-300 h-[400px] cursor-pointer group"
                                 >
-                                    Read More
-                                    <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
-                                </button>
-                            </motion.div>
-                        ))}
+                                    <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-colors duration-300 shadow-inner mb-6">
+                                        {service.icon}
+                                    </div>
+                                    <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-primary transition-colors">{service.title}</h3>
+                                    <div className="flex-grow overflow-hidden relative">
+                                        <p className="text-slate-600 leading-relaxed text-sm line-clamp-4">
+                                            {service.description}
+                                        </p>
+                                        <div className="absolute bottom-0 left-0 w-full h-8 bg-gradient-to-t from-white to-transparent" />
+                                    </div>
+                                    <div
+                                        className="mt-4 flex items-center gap-2 text-primary font-semibold text-sm hover:gap-3 transition-all group/btn"
+                                    >
+                                        Read More
+                                        <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+                                    </div>
+                                </div>
+                            ))}
+                        </motion.div>
                     </div>
                     {/* Fade edges */}
-                    <div className="absolute top-0 right-0 h-full w-24 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none md:block hidden" />
-                    <div className="absolute top-0 left-0 h-full w-24 bg-gradient-to-r from-slate-50 to-transparent pointer-events-none md:block hidden" />
+                    <div className="absolute top-0 right-0 h-full w-24 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none z-10" />
+                    <div className="absolute top-0 left-0 h-full w-24 bg-gradient-to-r from-slate-50 to-transparent pointer-events-none z-10" />
                 </div>
 
                 {/* Course Offerings Grid */}

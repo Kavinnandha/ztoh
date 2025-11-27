@@ -8,7 +8,7 @@ import { useJoinUsModal } from "@/components/providers/ModalProvider";
 export default function CallToAction() {
     const { openJoinUsModal } = useJoinUsModal();
     return (
-        <section id="contact" className="py-24 relative overflow-hidden">
+        <section id="cta" className="py-24 relative overflow-hidden">
             <div className="container mx-auto px-4 md:px-6 relative z-10">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}

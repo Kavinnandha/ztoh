@@ -30,10 +30,10 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ success: true, message: 'Password updated successfully' });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Change password error:', error);
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: error.message || 'Internal server error' },
             { status: 500 }
         );
     }

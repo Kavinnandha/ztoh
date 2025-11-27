@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { Lock, Mail, Loader2, ArrowRight, ShieldCheck } from 'lucide-react';
 
 export default function AdminLogin() {
     const [email, setEmail] = useState('');
@@ -25,8 +27,7 @@ export default function AdminLogin() {
             });
 
             if (res.ok) {
-                localStorage.setItem('adminLoggedIn', 'true');
-                window.location.href = '/admin';
+                router.push('/admin');
             } else {
                 const data = await res.json();
                 setError(data.error || 'Login failed');
@@ -39,63 +40,89 @@ export default function AdminLogin() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8">
-                <div>
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                        Admin Login
-                    </h2>
-                </div>
-                <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                    <input type="hidden" name="remember" value="true" />
-                    <div className="rounded-md shadow-sm -space-y-px">
-                        <div>
-                            <label htmlFor="email-address" className="sr-only">Email address</label>
-                            <input
-                                id="email-address"
-                                name="email"
-                                type="email"
-                                autoComplete="email"
-                                required
-                                className="appearance-none rounded-none rounded-t-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
-                                placeholder="Email address"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="password" className="sr-only">Password</label>
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                autoComplete="current-password"
-                                required
-                                className="appearance-none rounded-none rounded-b-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
-                                placeholder="Password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
+            >
+                <div className="p-8 md:p-10">
+                    <div className="flex justify-center mb-8">
+                        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                            <ShieldCheck size={32} />
                         </div>
                     </div>
 
-                    {error && (
-                        <div className="text-red-500 text-sm text-center">
-                            {error}
-                        </div>
-                    )}
+                    <h2 className="text-3xl font-bold text-center text-slate-900 mb-2 font-heading">Welcome Back</h2>
+                    <p className="text-center text-slate-500 mb-8">Sign in to access the admin dashboard</p>
 
-                    <div>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1.5">Email Address</label>
+                            <div className="relative">
+                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                                <input
+                                    type="email"
+                                    required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-slate-900 placeholder:text-slate-400"
+                                    placeholder="admin@ztoh.org"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
+                            <div className="relative">
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                                <input
+                                    type="password"
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-slate-900 placeholder:text-slate-400"
+                                    placeholder="••••••••"
+                                />
+                            </div>
+                        </div>
+
+                        {error && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                className="text-red-500 text-sm text-center bg-red-50 p-3 rounded-lg"
+                            >
+                                {error}
+                            </motion.div>
+                        )}
+
                         <button
                             type="submit"
                             disabled={loading}
-                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
+                            className="w-full py-3.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
-                            {loading ? 'Signing in...' : 'Sign in'}
+                            {loading ? (
+                                <>
+                                    <Loader2 className="animate-spin" size={20} />
+                                    Signing in...
+                                </>
+                            ) : (
+                                <>
+                                    Sign In
+                                    <ArrowRight size={20} />
+                                </>
+                            )}
                         </button>
-                    </div>
-                </form>
-            </div>
+                    </form>
+                </div>
+                <div className="bg-slate-50 p-4 text-center border-t border-slate-100">
+                    <p className="text-xs text-slate-500">
+                        Protected by secure authentication system.
+                    </p>
+                </div>
+            </motion.div>
         </div>
     );
 }

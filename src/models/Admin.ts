@@ -5,7 +5,6 @@ export interface IAdmin extends Document {
     name: string;
     email: string;
     password?: string;
-    role: 'superadmin' | 'admin' | 'editor';
     createdAt: Date;
     updatedAt: Date;
     comparePassword(candidatePassword: string): Promise<boolean>;
@@ -15,20 +14,18 @@ const AdminSchema: Schema = new Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    role: { type: String, enum: ['superadmin', 'admin', 'editor'], default: 'admin' },
 }, {
     timestamps: true,
 });
 
-AdminSchema.pre('save', async function (this: IAdmin, next: any) {
-    if (!this.isModified('password')) return next();
+AdminSchema.pre('save', async function (this: IAdmin) {
+    if (!this.isModified('password')) return;
 
     try {
         const salt = await bcrypt.genSalt(10);
         this.password = await bcrypt.hash(this.password as string, salt);
-        next();
-    } catch (error: any) {
-        next(error);
+    } catch (error) {
+        throw error;
     }
 });
 

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Admin from '@/models/Admin';
+import { signToken } from '@/lib/auth';
 
 export async function POST(request: Request) {
     try {
@@ -14,7 +15,6 @@ export async function POST(request: Request) {
                 name: 'Admin',
                 email: 'admin@ztoh.com',
                 password: 'admin', // In real app, hash this!
-                role: 'superadmin'
             });
         }
 
@@ -39,7 +39,18 @@ export async function POST(request: Request) {
             );
         }
 
-        return NextResponse.json({ success: true });
+        const token = await signToken({ id: admin._id.toString(), email: admin.email });
+
+        const response = NextResponse.json({ success: true });
+        response.cookies.set('adminToken', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 60 * 60 * 24, // 1 day
+            path: '/',
+        });
+
+        return response;
 
     } catch (error: any) {
         console.error('Login error:', error);
