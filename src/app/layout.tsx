@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import { ModalProvider } from "@/components/providers/ModalProvider";
+import LayoutContent from "@/components/layout/LayoutContent";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -36,11 +35,9 @@ export default function RootLayout({
         )}
       >
         <ModalProvider>
-          <Header />
-          <main className="flex-grow">
+          <LayoutContent>
             {children}
-          </main>
-          <Footer />
+          </LayoutContent>
         </ModalProvider>
       </body>
     </html>

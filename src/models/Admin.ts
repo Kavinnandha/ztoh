@@ -1,12 +1,14 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 export interface IAdmin extends Document {
     name: string;
     email: string;
-    password?: string; // Optional if using OAuth later, but required for credentials
+    password?: string;
     role: 'superadmin' | 'admin' | 'editor';
     createdAt: Date;
     updatedAt: Date;
+    comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 const AdminSchema: Schema = new Schema({
@@ -17,6 +19,31 @@ const AdminSchema: Schema = new Schema({
 }, {
     timestamps: true,
 });
+
+AdminSchema.pre('save', async function (this: IAdmin, next: any) {
+    if (!this.isModified('password')) return next();
+
+    try {
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password as string, salt);
+        next();
+    } catch (error: any) {
+        next(error);
+    }
+});
+
+AdminSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
+    try {
+        if (!this.password) {
+            console.error('Admin password is missing');
+            return false;
+        }
+        return await bcrypt.compare(candidatePassword, this.password);
+    } catch (error) {
+        console.error('Error comparing password:', error);
+        throw error;
+    }
+};
 
 const Admin: Model<IAdmin> = mongoose.models.Admin || mongoose.model<IAdmin>('Admin', AdminSchema);
 
