@@ -1,7 +1,8 @@
 "use client";
 
 import { motion, useInView, useSpring, useTransform } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import ScrollAnimation from "@/components/animations/ScrollAnimation";
 
 const stats = [
     { label: "Courses", value: 25, suffix: "+" },
@@ -43,19 +44,16 @@ export default function Stats() {
             <div className="container mx-auto px-4 md:px-6 relative z-10">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 text-center divide-x divide-white/10">
                     {stats.map((stat, index) => (
-                        <motion.div
+                        <ScrollAnimation
                             key={index}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: index * 0.1 }}
+                            delay={index * 0.1}
                             className="flex flex-col items-center p-4"
                         >
                             <div className="text-4xl md:text-6xl font-bold font-heading text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400 mb-2">
                                 <Counter value={stat.value} suffix={stat.suffix} />
                             </div>
                             <div className="text-secondary font-bold text-lg md:text-xl tracking-wide uppercase">{stat.label}</div>
-                        </motion.div>
+                        </ScrollAnimation>
                     ))}
                 </div>
             </div>

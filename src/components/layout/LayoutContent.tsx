@@ -20,7 +20,7 @@ export default function LayoutContent({
             <main className="flex-grow">
                 {children}
             </main>
-            <WhatsAppIcon />
+            {!isAdminPage && <WhatsAppIcon />}
             {!isAdminPage && <Footer />}
         </>
     );

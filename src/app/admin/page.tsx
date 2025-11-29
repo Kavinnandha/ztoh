@@ -22,6 +22,10 @@ interface ContactRequest {
     name: string;
     email: string;
     message: string;
+    status: 'pending' | 'accepted' | 'declined';
+    teleCallingStatus: 'pending' | 'called' | 'no_answer' | 'follow_up_needed' | 'converted' | 'not_interested';
+    notes: { content: string; createdAt: string }[];
+    history: { action: string; details: string; performedBy: string; timestamp: string }[];
     createdAt: string;
 }
 
@@ -31,6 +35,10 @@ interface JoinRequest {
     name: string;
     email: string;
     mobile: string;
+    status: 'pending' | 'accepted' | 'declined';
+    teleCallingStatus: 'pending' | 'called' | 'no_answer' | 'follow_up_needed' | 'converted' | 'not_interested';
+    notes: { content: string; createdAt: string }[];
+    history: { action: string; details: string; performedBy: string; timestamp: string }[];
     createdAt: string;
     [key: string]: any;
 }
@@ -57,7 +65,9 @@ export default function AdminDashboard() {
     // Search, Sort, Filter
     const [searchTerm, setSearchTerm] = useState('');
     const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'accepted' | 'declined'>('all');
     const [filterType, setFilterType] = useState<'all' | 'student' | 'teacher'>('all');
+    const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
 
     // Modals
     const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -66,6 +76,7 @@ export default function AdminDashboard() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showEditAdminModal, setShowEditAdminModal] = useState(false);
     const [showDeleteAdminModal, setShowDeleteAdminModal] = useState(false);
+    const [showEmailModal, setShowEmailModal] = useState(false);
 
     // Form States
     const [currentPassword, setCurrentPassword] = useState('');
@@ -85,6 +96,25 @@ export default function AdminDashboard() {
 
     const [deleteStatus, setDeleteStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [deleteAdminStatus, setDeleteAdminStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+    // New Features State
+    const [emailData, setEmailData] = useState({ to: '', subject: '', body: '' });
+    const [sendingEmail, setSendingEmail] = useState(false);
+    const [noteContent, setNoteContent] = useState('');
+    const [addingNote, setAddingNote] = useState(false);
+    const [updatingStatus, setUpdatingStatus] = useState(false);
+
+    // Toast Timer
+    useEffect(() => {
+        if (toast) {
+            const timer = setTimeout(() => setToast(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [toast]);
+
+    const showToast = (message: string, type: 'success' | 'error') => {
+        setToast({ message, type });
+    };
 
     useEffect(() => {
         const fetchMe = async () => {
@@ -134,7 +164,6 @@ export default function AdminDashboard() {
     }, [activeTab, isAuthenticated]);
 
     const handleLogout = async () => {
-        // Clear cookie via API
         await fetch('/api/admin/logout', { method: 'POST' });
         router.push('/admin/login');
     };
@@ -332,6 +361,156 @@ export default function AdminDashboard() {
         setShowDeleteModal(true);
     };
 
+    const handleUpdateStatus = async (newStatus: string) => {
+        if (!selectedRequest) return;
+        setUpdatingStatus(true);
+        try {
+            const res = await fetch(`/api/admin/requests/${selectedRequest._id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: activeTab,
+                    status: newStatus,
+                    history: [...(selectedRequest.history || []), {
+                        action: 'Status Update',
+                        details: `Status changed to ${newStatus}`,
+                        performedBy: 'Admin',
+                        timestamp: new Date()
+                    }]
+                }),
+            });
+            if (res.ok) {
+                const updated = await res.json();
+                setSelectedRequest(updated);
+                fetchRequests();
+                showToast(`Status updated to ${newStatus}`, 'success');
+            }
+        } catch (error) {
+            console.error('Failed to update status', error);
+            showToast('Failed to update status', 'error');
+        } finally {
+            setUpdatingStatus(false);
+        }
+    };
+
+    const handleUpdateTeleStatus = async (newStatus: string) => {
+        if (!selectedRequest) return;
+        setUpdatingStatus(true);
+        try {
+            const res = await fetch(`/api/admin/requests/${selectedRequest._id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: activeTab,
+                    teleCallingStatus: newStatus,
+                    history: [...(selectedRequest.history || []), {
+                        action: 'Tele-calling Update',
+                        details: `Tele-calling status changed to ${newStatus}`,
+                        performedBy: 'Admin',
+                        timestamp: new Date()
+                    }]
+                }),
+            });
+            if (res.ok) {
+                const updated = await res.json();
+                setSelectedRequest(updated);
+                fetchRequests();
+                showToast(`Tele-calling status updated to ${newStatus}`, 'success');
+            }
+        } catch (error) {
+            console.error('Failed to update tele-status', error);
+            showToast('Failed to update tele-status', 'error');
+        } finally {
+            setUpdatingStatus(false);
+        }
+    };
+
+    const handleAddNote = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedRequest || !noteContent.trim()) return;
+        setAddingNote(true);
+        try {
+            const res = await fetch(`/api/admin/requests/${selectedRequest._id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: activeTab,
+                    notes: [...(selectedRequest.notes || []), {
+                        content: noteContent,
+                        createdAt: new Date()
+                    }]
+                }),
+            });
+            if (res.ok) {
+                const updated = await res.json();
+                setSelectedRequest(updated);
+                setNoteContent('');
+                fetchRequests();
+                showToast('Note added successfully', 'success');
+            }
+        } catch (error) {
+            console.error('Failed to add note', error);
+            showToast('Failed to add note', 'error');
+        } finally {
+            setAddingNote(false);
+        }
+    };
+
+    const openEmailModal = () => {
+        if (!selectedRequest) return;
+        setEmailData({
+            to: selectedRequest.email,
+            subject: `Regarding your ${activeTab === 'join' ? 'Application' : 'Enquiry'} at Zero To Hero`,
+            body: `Dear ${selectedRequest.name},\n\n`
+        });
+        setShowEmailModal(true);
+    };
+
+    const handleSendEmail = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSendingEmail(true);
+        try {
+            const res = await fetch('/api/admin/email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    to: emailData.to,
+                    subject: emailData.subject,
+                    html: emailData.body.replace(/\n/g, '<br>') // Simple conversion
+                }),
+            });
+
+            if (res.ok) {
+                setShowEmailModal(false);
+                // Log to history
+                if (selectedRequest) {
+                    await fetch(`/api/admin/requests/${selectedRequest._id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: activeTab,
+                            history: [...(selectedRequest.history || []), {
+                                action: 'Email Sent',
+                                details: `Subject: ${emailData.subject}`,
+                                performedBy: 'Admin',
+                                timestamp: new Date()
+                            }]
+                        }),
+                    });
+                    fetchRequests(); // Refresh to show history
+                }
+                showToast('Email sent successfully!', 'success');
+            } else {
+                showToast('Failed to send email.', 'error');
+            }
+        } catch (error) {
+            console.error('Failed to send email', error);
+            showToast('An error occurred.', 'error');
+        } finally {
+            setSendingEmail(false);
+        }
+    };
+
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-US', {
             year: 'numeric',
@@ -341,6 +520,8 @@ export default function AdminDashboard() {
             minute: '2-digit',
         });
     };
+
+    // ... (existing handlers)
 
     const getFilteredAndSortedRequests = () => {
         if (activeTab === 'admins') return admins; // Simple return for now, can add search later
@@ -359,6 +540,10 @@ export default function AdminDashboard() {
             requests = requests.filter(req => req.type === filterType);
         }
 
+        if (statusFilter !== 'all') {
+            requests = requests.filter(req => (req.status || 'pending') === statusFilter);
+        }
+
         requests.sort((a, b) => {
             const dateA = new Date(a.createdAt).getTime();
             const dateB = new Date(b.createdAt).getTime();
@@ -368,14 +553,65 @@ export default function AdminDashboard() {
         return requests;
     };
 
+    // Custom Select Component
+    const CustomSelect = ({ value, onChange, options, label, disabled }: any) => {
+        const [isOpen, setIsOpen] = useState(false);
+        const selectedOption = options.find((opt: any) => opt.value === value);
+
+        return (
+            <div className="relative min-w-[200px]">
+                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{label}</label>
+                <button
+                    onClick={() => !disabled && setIsOpen(!isOpen)}
+                    className={`w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium flex justify-between items-center ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-slate-300'}`}
+                >
+                    <span className="capitalize">{selectedOption?.label || value}</span>
+                    <Filter size={14} className="text-slate-400" />
+                </button>
+                {isOpen && (
+                    <>
+                        <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)}></div>
+                        <div className="absolute z-20 w-full mt-1 bg-white border border-slate-100 rounded-lg shadow-lg py-1 max-h-60 overflow-auto">
+                            {options.map((option: any) => (
+                                <button
+                                    key={option.value}
+                                    onClick={() => {
+                                        onChange(option.value);
+                                        setIsOpen(false);
+                                    }}
+                                    className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-50 ${value === option.value ? 'text-primary font-semibold bg-primary/5' : 'text-slate-700'}`}
+                                >
+                                    {option.label}
+                                </button>
+                            ))}
+                        </div>
+                    </>
+                )}
+            </div>
+        );
+    };
+
+    // Toast Component
+    const Toast = () => {
+        if (!toast) return null;
+        return (
+            <div className={`fixed bottom-4 right-4 z-[60] px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300 ${toast.type === 'success' ? 'bg-slate-900 text-white' : 'bg-red-500 text-white'}`}>
+                {toast.type === 'success' ? <Check size={18} /> : <X size={18} />}
+                <span className="font-medium text-sm">{toast.message}</span>
+            </div>
+        );
+    };
+
     const displayedRequests = getFilteredAndSortedRequests();
 
     if (!isAuthenticated) return null;
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 relative">
+            <Toast />
             {/* Header Actions */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                {/* ... (existing header content) ... */}
                 <div>
                     <h1 className="text-2xl font-bold font-heading text-slate-900">Dashboard Overview</h1>
                     <p className="text-slate-500 text-sm">Manage your requests and administrators</p>
@@ -412,7 +648,7 @@ export default function AdminDashboard() {
                     <div className="flex flex-col sm:flex-row justify-between gap-4">
                         <div className="flex p-1 bg-slate-100 rounded-xl self-start">
                             <button
-                                onClick={() => { setActiveTab('join'); setFilterType('all'); }}
+                                onClick={() => { setActiveTab('join'); setFilterType('all'); setStatusFilter('all'); }}
                                 className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'join'
                                     ? 'bg-white text-slate-900 shadow-sm'
                                     : 'text-slate-500 hover:text-slate-700'
@@ -421,7 +657,7 @@ export default function AdminDashboard() {
                                 Join Requests
                             </button>
                             <button
-                                onClick={() => setActiveTab('contact')}
+                                onClick={() => { setActiveTab('contact'); setStatusFilter('all'); }}
                                 className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'contact'
                                     ? 'bg-white text-slate-900 shadow-sm'
                                     : 'text-slate-500 hover:text-slate-700'
@@ -452,12 +688,29 @@ export default function AdminDashboard() {
                                 />
                             </div>
 
+                            {/* Status Filter */}
+                            {activeTab !== 'admins' && (
+                                <div className="flex items-center gap-2 border border-slate-200 rounded-xl px-3 bg-white">
+                                    <span className="text-xs font-semibold text-slate-500 uppercase">Status:</span>
+                                    <select
+                                        value={statusFilter}
+                                        onChange={(e) => setStatusFilter(e.target.value as any)}
+                                        className="py-2 text-sm bg-transparent border-none focus:ring-0 text-slate-700 cursor-pointer outline-none"
+                                    >
+                                        <option value="all">All</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="accepted">Accepted</option>
+                                        <option value="declined">Declined</option>
+                                    </select>
+                                </div>
+                            )}
+
                             <div className="flex items-center gap-2 border border-slate-200 rounded-xl px-3 bg-white">
                                 <Filter size={16} className="text-slate-400" />
                                 <select
                                     value={sortOrder}
                                     onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
-                                    className="py-2 text-sm bg-transparent border-none focus:ring-0 text-slate-700 cursor-pointer"
+                                    className="py-2 text-sm bg-transparent border-none focus:ring-0 text-slate-700 cursor-pointer outline-none"
                                 >
                                     <option value="newest">Newest</option>
                                     <option value="oldest">Oldest</option>
@@ -470,7 +723,7 @@ export default function AdminDashboard() {
                                     <select
                                         value={filterType}
                                         onChange={(e) => setFilterType(e.target.value as 'all' | 'student' | 'teacher')}
-                                        className="py-2 text-sm bg-transparent border-none focus:ring-0 text-slate-700 cursor-pointer"
+                                        className="py-2 text-sm bg-transparent border-none focus:ring-0 text-slate-700 cursor-pointer outline-none"
                                     >
                                         <option value="all">All</option>
                                         <option value="student">Student</option>
@@ -478,16 +731,12 @@ export default function AdminDashboard() {
                                     </select>
                                 </div>
                             )}
-                            {activeTab === 'admins' && (
-                                <div className="flex items-center gap-2 px-3">
-                                    <span className="text-sm font-semibold text-slate-500">Manage Admins</span>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
 
                 {/* List */}
+                {/* ... (existing list code) ... */}
                 <div className="overflow-x-auto">
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-20">
@@ -543,6 +792,7 @@ export default function AdminDashboard() {
                                     <th className="px-6 py-4">Name</th>
                                     <th className="px-6 py-4">Contact</th>
                                     {activeTab === 'join' && <th className="px-6 py-4">Type</th>}
+                                    <th className="px-6 py-4">Status</th>
                                     <th className="px-6 py-4">Date</th>
                                     <th className="px-6 py-4 text-right">Actions</th>
                                 </tr>
@@ -567,6 +817,14 @@ export default function AdminDashboard() {
                                                 </span>
                                             </td>
                                         )}
+                                        <td className="px-6 py-4">
+                                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${request.status === 'accepted' ? 'bg-green-100 text-green-700' :
+                                                request.status === 'declined' ? 'bg-red-100 text-red-700' :
+                                                    'bg-yellow-100 text-yellow-700'
+                                                }`}>
+                                                {request.status || 'pending'}
+                                            </span>
+                                        </td>
                                         <td className="px-6 py-4 text-sm text-slate-500">
                                             {formatDate(request.createdAt)}
                                         </td>
@@ -597,30 +855,138 @@ export default function AdminDashboard() {
             </div>
 
             {/* View Details Modal */}
-            {selectedRequest && !showEditModal && !showDeleteModal && (
+            {selectedRequest && !showEditModal && !showDeleteModal && !showEmailModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                         <div className="p-6 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white z-10">
-                            <h3 className="text-xl font-bold text-slate-900">Request Details</h3>
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-900">Request Details</h3>
+                                <p className="text-sm text-slate-500">Manage status and track history</p>
+                            </div>
                             <button onClick={() => setSelectedRequest(null)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
                                 <X size={20} className="text-slate-500" />
                             </button>
                         </div>
-                        <div className="p-6 space-y-4">
-                            {Object.entries(selectedRequest).map(([key, value]) => {
-                                if (['_id', '__v', 'updatedAt'].includes(key)) return null;
-                                return (
-                                    <div key={key} className="grid grid-cols-3 gap-4 pb-4 border-b border-slate-50 last:border-0">
-                                        <span className="text-sm font-semibold text-slate-500 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                                        <span className="col-span-2 text-sm text-slate-900 break-words font-medium">
-                                            {key === 'createdAt' ? formatDate(value as string) : String(value)}
-                                        </span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                        <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
 
+                        <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            {/* Left Column: Details */}
+                            <div className="lg:col-span-2 space-y-6">
+                                {/* Status Actions */}
+                                {activeTab !== 'contact' && (
+                                    <div className="flex flex-wrap gap-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                        <CustomSelect
+                                            label="Status"
+                                            value={selectedRequest.status || 'pending'}
+                                            onChange={handleUpdateStatus}
+                                            disabled={updatingStatus}
+                                            options={[
+                                                { value: 'pending', label: 'Pending' },
+                                                { value: 'accepted', label: 'Accepted' },
+                                                { value: 'declined', label: 'Declined' }
+                                            ]}
+                                        />
+                                        <CustomSelect
+                                            label="Tele-calling Status"
+                                            value={selectedRequest.teleCallingStatus || 'pending'}
+                                            onChange={handleUpdateTeleStatus}
+                                            disabled={updatingStatus}
+                                            options={[
+                                                { value: 'pending', label: 'Pending' },
+                                                { value: 'called', label: 'Called' },
+                                                { value: 'no_answer', label: 'No Answer' },
+                                                { value: 'follow_up_needed', label: 'Follow Up Needed' },
+                                                { value: 'converted', label: 'Converted' },
+                                                { value: 'not_interested', label: 'Not Interested' }
+                                            ]}
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Quick Actions */}
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={openEmailModal}
+                                        className="flex-1 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-sm font-semibold hover:bg-blue-100 transition-colors"
+                                    >
+                                        Send Email
+                                    </button>
+                                </div>
+
+                                {/* Data Fields */}
+                                <div className="space-y-4">
+                                    <h4 className="font-bold text-slate-900">Information</h4>
+                                    {Object.entries(selectedRequest).map(([key, value]) => {
+                                        if (['_id', '__v', 'updatedAt', 'status', 'teleCallingStatus', 'notes', 'history'].includes(key)) return null;
+                                        return (
+                                            <div key={key} className="grid grid-cols-3 gap-4 pb-4 border-b border-slate-50 last:border-0">
+                                                <span className="text-sm font-semibold text-slate-500 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                                                <span className="col-span-2 text-sm text-slate-900 break-words font-medium">
+                                                    {key === 'createdAt' ? formatDate(value as string) : String(value)}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Right Column: Notes & History */}
+                            <div className="space-y-8">
+                                {/* Notes */}
+                                <div>
+                                    <h4 className="font-bold text-slate-900 mb-4">Notes</h4>
+                                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 max-h-60 overflow-y-auto mb-4 space-y-3">
+                                        {selectedRequest.notes?.length ? (
+                                            selectedRequest.notes.map((note, idx) => (
+                                                <div key={idx} className="bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
+                                                    <p className="text-sm text-slate-700 mb-1">{note.content}</p>
+                                                    <p className="text-xs text-slate-400">{formatDate(note.createdAt)}</p>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-sm text-slate-400 text-center py-4">No notes yet.</p>
+                                        )}
+                                    </div>
+                                    <form onSubmit={handleAddNote} className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={noteContent}
+                                            onChange={(e) => setNoteContent(e.target.value)}
+                                            placeholder="Add a note..."
+                                            className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 outline-none"
+                                        />
+                                        <button
+                                            type="submit"
+                                            disabled={addingNote || !noteContent.trim()}
+                                            className="px-3 py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 disabled:opacity-50"
+                                        >
+                                            <Plus size={18} />
+                                        </button>
+                                    </form>
+                                </div>
+
+                                {/* History */}
+                                <div>
+                                    <h4 className="font-bold text-slate-900 mb-4">History</h4>
+                                    <div className="relative border-l-2 border-slate-100 ml-2 space-y-6">
+                                        {selectedRequest.history?.slice().reverse().map((event, idx) => (
+                                            <div key={idx} className="relative pl-6">
+                                                <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-slate-300 ring-4 ring-white"></div>
+                                                <p className="text-sm font-semibold text-slate-900">{event.action}</p>
+                                                <p className="text-xs text-slate-500 mb-1">{event.details}</p>
+                                                <p className="text-[10px] text-slate-400 uppercase tracking-wide">
+                                                    {formatDate(event.timestamp)} • {event.performedBy}
+                                                </p>
+                                            </div>
+                                        ))}
+                                        {!selectedRequest.history?.length && (
+                                            <p className="text-sm text-slate-400 pl-6">No history available.</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
                             <button
                                 onClick={() => setSelectedRequest(null)}
                                 className="px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-semibold hover:bg-slate-800 transition-colors"
@@ -628,6 +994,66 @@ export default function AdminDashboard() {
                                 Close
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Email Modal */}
+            {showEmailModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full">
+                        <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+                            <h3 className="text-xl font-bold text-slate-900">Send Email</h3>
+                            <button onClick={() => setShowEmailModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                                <X size={20} className="text-slate-500" />
+                            </button>
+                        </div>
+                        <form onSubmit={handleSendEmail} className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">To</label>
+                                <input
+                                    type="email"
+                                    value={emailData.to}
+                                    disabled
+                                    className="w-full px-4 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 cursor-not-allowed"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Subject</label>
+                                <input
+                                    type="text"
+                                    value={emailData.subject}
+                                    onChange={(e) => setEmailData({ ...emailData, subject: e.target.value })}
+                                    className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Message</label>
+                                <textarea
+                                    value={emailData.body}
+                                    onChange={(e) => setEmailData({ ...emailData, body: e.target.value })}
+                                    rows={6}
+                                    className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none"
+                                />
+                            </div>
+                            <div className="pt-4 flex justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowEmailModal(false)}
+                                    className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={sendingEmail}
+                                    className="px-4 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2"
+                                >
+                                    {sendingEmail && <Loader2 className="animate-spin" size={16} />}
+                                    Send Email
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

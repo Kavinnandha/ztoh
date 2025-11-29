@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import ScrollAnimation from "@/components/animations/ScrollAnimation";
 import { Star, Quote } from "lucide-react";
 
 const testimonials = [
@@ -138,32 +138,23 @@ export default function Testimonials() {
 
             <div className="container mx-auto px-4 md:px-6 mb-16 relative z-10">
                 <div className="text-center max-w-3xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="inline-block mb-4 px-4 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm text-sm font-semibold text-primary"
-                    >
-                        Success Stories
-                    </motion.div>
-                    <motion.h2
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.1 }}
-                        className="text-3xl md:text-5xl font-bold font-heading text-slate-900 mb-6"
-                    >
-                        Student <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Testimonials</span>
-                    </motion.h2>
-                    <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.2 }}
-                        className="text-lg text-slate-600"
-                    >
-                        See what our students and parents have to say about their experience with Zero to Hero.
-                    </motion.p>
+                    <div className="text-center max-w-3xl mx-auto">
+                        <ScrollAnimation>
+                            <div className="inline-block mb-4 px-4 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm text-sm font-semibold text-primary">
+                                Success Stories
+                            </div>
+                        </ScrollAnimation>
+                        <ScrollAnimation delay={0.1}>
+                            <h2 className="text-3xl md:text-5xl font-bold font-heading text-slate-900 mb-6">
+                                Student <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Testimonials</span>
+                            </h2>
+                        </ScrollAnimation>
+                        <ScrollAnimation delay={0.2}>
+                            <p className="text-lg text-slate-600">
+                                See what our students and parents have to say about their experience with Zero to Hero.
+                            </p>
+                        </ScrollAnimation>
+                    </div>
                 </div>
             </div>
 

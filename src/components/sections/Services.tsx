@@ -12,6 +12,7 @@ import {
     GraduationCap,
     ArrowRight
 } from "lucide-react";
+import ScrollAnimation from "@/components/animations/ScrollAnimation";
 
 const services = [
     {
@@ -125,56 +126,35 @@ export default function Services() {
 
                 {/* Section Header */}
                 <div className="text-center mb-20">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="inline-block mb-4 px-4 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm text-sm font-semibold text-primary"
-                    >
-                        What We Offer
-                    </motion.div>
-                    <motion.h2
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.1 }}
-                        className="text-3xl md:text-5xl font-bold font-heading text-slate-900 mb-6"
-                    >
-                        Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Services</span>
-                    </motion.h2>
-                    <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.2 }}
-                        className="text-lg text-slate-600 max-w-2xl mx-auto"
-                    >
-                        Comprehensive educational support tailored to your needs, from school boards to competitive entrance exams.
-                    </motion.p>
+                    <ScrollAnimation>
+                        <div className="inline-block mb-4 px-4 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm text-sm font-semibold text-primary">
+                            What We Offer
+                        </div>
+                    </ScrollAnimation>
+                    <ScrollAnimation delay={0.1}>
+                        <h2 className="text-3xl md:text-5xl font-bold font-heading text-slate-900 mb-6">
+                            Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Services</span>
+                        </h2>
+                    </ScrollAnimation>
+                    <ScrollAnimation delay={0.2}>
+                        <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+                            Comprehensive educational support tailored to your needs, from school boards to competitive entrance exams.
+                        </p>
+                    </ScrollAnimation>
                 </div>
 
                 {/* Detailed Services Carousel */}
                 <div className="relative mb-24 group overflow-hidden">
                     <div className="flex gap-6">
-                        <motion.div
-                            className="flex gap-6"
-                            animate={{
-                                x: ["0%", "-50%"]
-                            }}
-                            transition={{
-                                x: {
-                                    repeat: Infinity,
-                                    repeatType: "loop",
-                                    duration: 40,
-                                    ease: "linear",
-                                },
-                            }}
+                        <div
+                            className={`flex gap-6 animate-marquee hover:pause ${selectedService ? 'pause' : ''}`}
+                            style={{ width: "max-content" }}
                         >
                             {[...services, ...services].map((service, index) => (
                                 <div
                                     key={index}
                                     onClick={() => setSelectedService(service)}
-                                    className="shrink-0 w-[85vw] md:w-[400px] flex flex-col bg-white p-8 rounded-[2rem] shadow-lg shadow-slate-200/50 border border-slate-100 hover:shadow-xl hover:border-secondary/30 transition-all duration-300 h-[400px] cursor-pointer group"
+                                    className="shrink-0 w-[85vw] md:w-[400px] flex flex-col bg-white p-8 rounded-[2rem] shadow-lg shadow-slate-200/50 border border-slate-100 hover:shadow-2xl hover:border-secondary/50 hover:-translate-y-2 transition-all duration-300 h-[400px] cursor-pointer group"
                                 >
                                     <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-colors duration-300 shadow-inner mb-6">
                                         {service.icon}
@@ -194,7 +174,7 @@ export default function Services() {
                                     </div>
                                 </div>
                             ))}
-                        </motion.div>
+                        </div>
                     </div>
                     {/* Fade edges */}
                     <div className="absolute top-0 right-0 h-full w-24 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none z-10" />
@@ -216,29 +196,28 @@ export default function Services() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {courseOfferings.map((category, index) => (
-                                <motion.div
+                                <ScrollAnimation
                                     key={index}
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    whileInView={{ opacity: 1, scale: 1 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: index * 0.05 }}
-                                    className="glass-dark p-6 rounded-2xl hover:bg-white/10 transition-colors group"
+                                    delay={index * 0.05}
+                                    className="h-full"
                                 >
-                                    <div className="flex items-center gap-4 mb-6">
-                                        <div className="p-3 rounded-xl bg-white/5 group-hover:bg-secondary/20 transition-colors">
-                                            <GraduationCap className="text-secondary" size={24} />
+                                    <div className="glass-dark p-6 rounded-2xl hover:bg-white/10 transition-colors group h-full border border-white/5 hover:border-white/20">
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <div className="p-3 rounded-xl bg-white/5 group-hover:bg-secondary/20 transition-colors">
+                                                <GraduationCap className="text-secondary" size={24} />
+                                            </div>
+                                            <h4 className="text-xl font-bold group-hover:text-secondary transition-colors">{category.category}</h4>
                                         </div>
-                                        <h4 className="text-xl font-bold group-hover:text-secondary transition-colors">{category.category}</h4>
+                                        <ul className="space-y-3">
+                                            {category.courses.map((course, idx) => (
+                                                <li key={idx} className="flex items-center gap-3 text-slate-300 text-sm group/item">
+                                                    <ArrowRight size={12} className="text-slate-500 group-hover/item:text-secondary transition-colors" />
+                                                    {course}
+                                                </li>
+                                            ))}
+                                        </ul>
                                     </div>
-                                    <ul className="space-y-3">
-                                        {category.courses.map((course, idx) => (
-                                            <li key={idx} className="flex items-center gap-3 text-slate-300 text-sm group/item">
-                                                <ArrowRight size={12} className="text-slate-500 group-hover/item:text-secondary transition-colors" />
-                                                {course}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </motion.div>
+                                </ScrollAnimation>
                             ))}
                         </div>
                     </div>

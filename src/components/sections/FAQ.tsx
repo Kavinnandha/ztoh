@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Plus, Minus } from "lucide-react";
 import { useState } from "react";
+import ScrollAnimation from "@/components/animations/ScrollAnimation";
 
 const faqs = [
     {
@@ -50,22 +51,23 @@ export default function FAQ() {
         <section id="faq" className="py-20 bg-slate-50">
             <div className="container mx-auto px-4 md:px-6">
                 <div className="text-center max-w-3xl mx-auto mb-16">
-                    <h2 className="text-3xl md:text-4xl font-bold font-heading text-slate-900 mb-4">
-                        Frequently Asked <span className="text-primary">Questions</span>
-                    </h2>
-                    <p className="text-lg text-slate-600">
-                        Find answers to common questions about our tutoring services.
-                    </p>
+                    <ScrollAnimation>
+                        <h2 className="text-3xl md:text-4xl font-bold font-heading text-slate-900 mb-4">
+                            Frequently Asked <span className="text-primary">Questions</span>
+                        </h2>
+                    </ScrollAnimation>
+                    <ScrollAnimation delay={0.1}>
+                        <p className="text-lg text-slate-600">
+                            Find answers to common questions about our tutoring services.
+                        </p>
+                    </ScrollAnimation>
                 </div>
 
                 <div className="max-w-3xl mx-auto space-y-4">
                     {faqs.map((faq, index) => (
-                        <motion.div
+                        <ScrollAnimation
                             key={index}
-                            initial={{ opacity: 0, y: 10 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: index * 0.05 }}
+                            delay={index * 0.05}
                             className="bg-white rounded-2xl border border-slate-100 overflow-hidden"
                         >
                             <button
@@ -86,7 +88,7 @@ export default function FAQ() {
                                     {faq.answer}
                                 </div>
                             </motion.div>
-                        </motion.div>
+                        </ScrollAnimation>
                     ))}
                 </div>
             </div>

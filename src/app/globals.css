@@ -112,4 +112,8 @@ body {
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  .pause {
+    animation-play-state: paused !important;
+  }
 }
