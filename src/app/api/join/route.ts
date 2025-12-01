@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import JoinRequest from '@/models/JoinRequest';
 import { Resend } from 'resend';
+import { verifyTurnstileToken } from '@/lib/turnstile';
 
 export async function POST(request: Request) {
     try {
@@ -13,8 +14,19 @@ export async function POST(request: Request) {
             // Student fields
             applyingAs, currentStatus, gradeYear, boardUniversity, subjectDetails, modeOfStudy,
             // Teacher fields
-            qualification, nationality, state, city, currentJobDetails, experience, subjectWillingToHandle, modeOfTutoring, workType
+            qualification, nationality, state, city, currentJobDetails, experience, subjectWillingToHandle, modeOfTutoring, workType,
+            token
         } = body;
+
+        // Verify Turnstile Token
+        if (token) {
+            const isVerified = await verifyTurnstileToken(token);
+            if (!isVerified) {
+                return NextResponse.json({ success: false, error: 'Invalid captcha token' }, { status: 400 });
+            }
+        } else {
+            return NextResponse.json({ success: false, error: 'Captcha token is required' }, { status: 400 });
+        }
 
         // 1. Validate Common Fields
         if (!type || !['student', 'teacher'].includes(type)) {
@@ -81,7 +93,7 @@ export async function POST(request: Request) {
 
                 // Format details for email
                 const detailsHtml = Object.entries(body)
-                    .filter(([key]) => key !== 'type' && key !== 'name' && key !== 'email')
+                    .filter(([key]) => key !== 'type' && key !== 'name' && key !== 'email' && key !== 'token')
                     .map(([key, value]) => `<p><strong>${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:</strong> ${value}</p>`)
                     .join('');
 

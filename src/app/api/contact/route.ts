@@ -2,11 +2,30 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import ContactRequest from '@/models/ContactRequest';
 import { Resend } from 'resend';
+import { verifyTurnstileToken } from '@/lib/turnstile';
 
 export async function POST(req: Request) {
     try {
         await connectDB();
-        const { name, email, message } = await req.json();
+        const { name, email, message, token } = await req.json();
+
+        // Verify Turnstile Token
+        if (token) {
+            const isVerified = await verifyTurnstileToken(token);
+            if (!isVerified) {
+                return NextResponse.json(
+                    { error: 'Invalid captcha token' },
+                    { status: 400 }
+                );
+            }
+        } else {
+            // Optional: Enforce token presence if strict mode is desired.
+            // For now, we'll return error if token is missing to enforce usage.
+            return NextResponse.json(
+                { error: 'Captcha token is required' },
+                { status: 400 }
+            );
+        }
 
         // Validate input
         if (!name || !email || !message) {

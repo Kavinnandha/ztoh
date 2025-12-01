@@ -2,7 +2,8 @@
 
 import ScrollAnimation from "@/components/animations/ScrollAnimation";
 import { MapPin, Mail, Phone, Send } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 
 export default function Contact() {
     const [formData, setFormData] = useState({
@@ -11,6 +12,8 @@ export default function Contact() {
         message: ''
     });
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [token, setToken] = useState<string | null>(null);
+    const turnstileRef = useRef<TurnstileInstance>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData(prev => ({
@@ -21,6 +24,12 @@ export default function Contact() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!token) {
+            alert("Please complete the captcha");
+            return;
+        }
+
         setStatus('loading');
 
         try {
@@ -29,12 +38,14 @@ export default function Contact() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({ ...formData, token }),
             });
 
             if (response.ok) {
                 setStatus('success');
                 setFormData({ name: '', email: '', message: '' });
+                turnstileRef.current?.reset();
+                setToken(null);
                 setTimeout(() => setStatus('idle'), 3000);
             } else {
                 setStatus('error');
@@ -171,6 +182,17 @@ export default function Contact() {
                                     required
                                     disabled={status === 'loading'}
                                 ></textarea>
+                            </div>
+
+                            <div className="flex justify-center mb-6">
+                                <Turnstile
+                                    ref={turnstileRef}
+                                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""}
+                                    onSuccess={setToken}
+                                    options={{
+                                        theme: 'light',
+                                    }}
+                                />
                             </div>
 
                             <button

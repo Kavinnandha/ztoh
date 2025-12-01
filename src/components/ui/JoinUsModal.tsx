@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Loader2, CheckCircle } from "lucide-react";
 import CustomSelect from "./CustomSelect";
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 
 interface JoinUsModalProps {
     isOpen: boolean;
@@ -15,6 +16,8 @@ export default function JoinUsModal({ isOpen, onClose }: JoinUsModalProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [error, setError] = useState("");
+    const [token, setToken] = useState<string | null>(null);
+    const turnstileRef = useRef<TurnstileInstance>(null);
 
     // Form State for Selects
     const [selectValues, setSelectValues] = useState({
@@ -39,6 +42,10 @@ export default function JoinUsModal({ isOpen, onClose }: JoinUsModalProps) {
                 modeOfTutoring: "",
                 workType: ""
             });
+            setToken(null);
+            if (turnstileRef.current) {
+                turnstileRef.current.reset();
+            }
         }
     }, [isOpen]);
 
@@ -48,6 +55,12 @@ export default function JoinUsModal({ isOpen, onClose }: JoinUsModalProps) {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        if (!token) {
+            setError("Please complete the captcha");
+            return;
+        }
+
         setIsSubmitting(true);
         setError("");
 
@@ -60,7 +73,7 @@ export default function JoinUsModal({ isOpen, onClose }: JoinUsModalProps) {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ ...data, type: activeTab }),
+                body: JSON.stringify({ ...data, type: activeTab, token }),
             });
 
             const result = await response.json();
@@ -311,6 +324,17 @@ export default function JoinUsModal({ isOpen, onClose }: JoinUsModalProps) {
                                         {error && (
                                             <div className="text-red-500 text-sm text-center bg-red-50 p-3 rounded-lg">{error}</div>
                                         )}
+
+                                        <div className="flex justify-center">
+                                            <Turnstile
+                                                ref={turnstileRef}
+                                                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""}
+                                                onSuccess={setToken}
+                                                options={{
+                                                    theme: 'light',
+                                                }}
+                                            />
+                                        </div>
 
                                         <button
                                             disabled={isSubmitting}
