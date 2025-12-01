@@ -3,6 +3,7 @@ import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ModalProvider } from "@/components/providers/ModalProvider";
+import { ToastProvider } from "@/components/providers/ToastProvider";
 import LayoutContent from "@/components/layout/LayoutContent";
 
 const inter = Inter({
@@ -34,11 +35,13 @@ export default function RootLayout({
           plusJakarta.variable
         )}
       >
-        <ModalProvider>
-          <LayoutContent>
-            {children}
-          </LayoutContent>
-        </ModalProvider>
+        <ToastProvider>
+          <ModalProvider>
+            <LayoutContent>
+              {children}
+            </LayoutContent>
+          </ModalProvider>
+        </ToastProvider>
       </body>
     </html>
   );

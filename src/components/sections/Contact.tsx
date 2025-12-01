@@ -4,6 +4,7 @@ import ScrollAnimation from "@/components/animations/ScrollAnimation";
 import { MapPin, Mail, Phone, Send } from "lucide-react";
 import { useState, useRef } from "react";
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
+import { useToast } from "@/components/providers/ToastProvider";
 
 export default function Contact() {
     const [formData, setFormData] = useState({
@@ -14,6 +15,7 @@ export default function Contact() {
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [token, setToken] = useState<string | null>(null);
     const turnstileRef = useRef<TurnstileInstance>(null);
+    const { addToast } = useToast();
 
     // Email Verification State
     const [verificationStatus, setVerificationStatus] = useState<'unverified' | 'sent' | 'verified'>('unverified');
@@ -90,12 +92,12 @@ export default function Contact() {
         e.preventDefault();
 
         if (!token) {
-            alert("Please complete the captcha");
+            addToast("Please complete the captcha", "error");
             return;
         }
 
         if (verificationStatus !== 'verified') {
-            alert("Please verify your email first");
+            addToast("Please verify your email first", "error");
             return;
         }
 
