@@ -7,7 +7,7 @@ export default function WhatsAppIcon() {
             href="https://wa.me/919564321000"
             target="_blank"
             rel="noopener noreferrer"
-            className="fixed bottom-6 right-6 z-50 group flex items-center justify-center"
+            className="fixed bottom-6 left-6 z-50 group flex items-center justify-center"
             aria-label="Chat on WhatsApp"
         >
             <div className="relative flex items-center justify-center">

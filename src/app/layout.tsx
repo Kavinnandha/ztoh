@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { ModalProvider } from "@/components/providers/ModalProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import LayoutContent from "@/components/layout/LayoutContent";
+import Chatbot from "@/components/Chatbot";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -40,6 +41,7 @@ export default function RootLayout({
             <LayoutContent>
               {children}
             </LayoutContent>
+            <Chatbot />
           </ModalProvider>
         </ToastProvider>
       </body>
