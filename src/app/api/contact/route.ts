@@ -3,11 +3,21 @@ import connectDB from '@/lib/db';
 import ContactRequest from '@/models/ContactRequest';
 import { Resend } from 'resend';
 import { verifyTurnstileToken } from '@/lib/turnstile';
+import Settings from '@/models/Settings';
+import { checkRateLimit } from '@/lib/rateLimit';
 
 export async function POST(req: Request) {
     try {
         await connectDB();
         const { name, email, message, token } = await req.json();
+
+        // Rate Limiting: 5 requests per hour per IP
+        const ip = req.headers.get('x-forwarded-for') || 'unknown';
+        const isAllowed = await checkRateLimit(`contact_${ip}`, 5, 60 * 60 * 1000);
+
+        if (!isAllowed) {
+            return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+        }
 
         // Verify Turnstile Token
         if (token) {
@@ -44,15 +54,14 @@ export async function POST(req: Request) {
         await newContactRequest.save();
 
         // Send email notification
-        // Note: This requires SMTP credentials in .env
-        // Send email notification
         // Note: This requires RESEND_API_KEY in .env
         if (process.env.RESEND_API_KEY) {
             try {
                 const resend = new Resend(process.env.RESEND_API_KEY);
 
-                const adminEmail = process.env.ADMIN_EMAIL;
-                const fromEmail = process.env.FROM_EMAIL;
+                const settings = await Settings.findOne();
+                const adminEmail = settings?.emailSettings?.adminEmail || process.env.ADMIN_EMAIL;
+                const fromEmail = settings?.emailSettings?.fromEmail || process.env.FROM_EMAIL;
 
                 if (adminEmail && fromEmail) {
                     // Send email to Admin

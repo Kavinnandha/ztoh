@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import mongoose from 'mongoose';
+import Settings from '@/models/Settings';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+const connectDB = async () => {
+    if (mongoose.connections[0].readyState) return;
+    await mongoose.connect(process.env.MONGODB_URI as string);
+};
 
 export async function POST(request: Request) {
     try {
@@ -15,8 +22,12 @@ export async function POST(request: Request) {
             );
         }
 
+        await connectDB();
+        const settings = await Settings.findOne();
+        const fromEmail = settings?.emailSettings?.fromEmail || process.env.FROM_EMAIL || 'Zero To Hero <onboarding@resend.dev>';
+
         const data = await resend.emails.send({
-            from: process.env.FROM_EMAIL || 'Zero To Hero <onboarding@resend.dev>',
+            from: fromEmail,
             to: to,
             subject: subject,
             html: html,

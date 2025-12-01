@@ -19,6 +19,13 @@ export default function JoinUsModal({ isOpen, onClose }: JoinUsModalProps) {
     const [token, setToken] = useState<string | null>(null);
     const turnstileRef = useRef<TurnstileInstance>(null);
 
+    // Email Verification State
+    const [verificationStatus, setVerificationStatus] = useState<'unverified' | 'sent' | 'verified'>('unverified');
+    const [verificationCode, setVerificationCode] = useState('');
+    const [isVerifying, setIsVerifying] = useState(false);
+    const [verificationMessage, setVerificationMessage] = useState('');
+    const [email, setEmail] = useState('');
+
     // Form State for Selects
     const [selectValues, setSelectValues] = useState({
         gender: "",
@@ -46,6 +53,10 @@ export default function JoinUsModal({ isOpen, onClose }: JoinUsModalProps) {
             if (turnstileRef.current) {
                 turnstileRef.current.reset();
             }
+            setVerificationStatus('unverified');
+            setVerificationCode('');
+            setVerificationMessage('');
+            setEmail('');
         }
     }, [isOpen]);
 
@@ -58,6 +69,11 @@ export default function JoinUsModal({ isOpen, onClose }: JoinUsModalProps) {
 
         if (!token) {
             setError("Please complete the captcha");
+            return;
+        }
+
+        if (verificationStatus !== 'verified') {
+            setError("Please verify your email first");
             return;
         }
 
@@ -88,6 +104,66 @@ export default function JoinUsModal({ isOpen, onClose }: JoinUsModalProps) {
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    const handleSendCode = async () => {
+        if (!email) {
+            setVerificationMessage('Please enter an email address');
+            return;
+        }
+        setIsVerifying(true);
+        setVerificationMessage('');
+        try {
+            const res = await fetch('/api/verify/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setVerificationStatus('sent');
+                setVerificationMessage('Verification code sent to your email');
+            } else {
+                setVerificationMessage(data.error || 'Failed to send code');
+            }
+        } catch (error) {
+            setVerificationMessage('Failed to send code');
+        } finally {
+            setIsVerifying(false);
+        }
+    };
+
+    const handleVerifyCode = async () => {
+        if (!verificationCode) {
+            setVerificationMessage('Please enter the code');
+            return;
+        }
+        setIsVerifying(true);
+        setVerificationMessage('');
+        try {
+            const res = await fetch('/api/verify/check', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, code: verificationCode }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setVerificationStatus('verified');
+                setVerificationMessage('Email verified successfully');
+            } else {
+                setVerificationMessage(data.error || 'Invalid code');
+            }
+        } catch (error) {
+            setVerificationMessage('Failed to verify code');
+        } finally {
+            setIsVerifying(false);
+        }
+    };
+
+    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setEmail(e.target.value);
+        setVerificationStatus('unverified');
+        setVerificationMessage('');
     };
 
     return (
@@ -170,7 +246,57 @@ export default function JoinUsModal({ isOpen, onClose }: JoinUsModalProps) {
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-medium text-slate-700 mb-1">Email <span className="text-red-500">*</span></label>
-                                                <input required name="email" type="email" className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" placeholder="Enter your email address" />
+                                                <div className="flex gap-2">
+                                                    <input
+                                                        required
+                                                        name="email"
+                                                        type="email"
+                                                        value={email}
+                                                        onChange={handleEmailChange}
+                                                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                                        placeholder="Enter your email address"
+                                                        disabled={verificationStatus === 'verified'}
+                                                    />
+                                                    {verificationStatus === 'unverified' && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={handleSendCode}
+                                                            disabled={isVerifying || !email}
+                                                            className="px-4 py-2 bg-slate-800 text-white rounded-xl text-sm font-medium hover:bg-slate-700 disabled:opacity-50 whitespace-nowrap"
+                                                        >
+                                                            {isVerifying ? 'Sending...' : 'Verify'}
+                                                        </button>
+                                                    )}
+                                                    {verificationStatus === 'verified' && (
+                                                        <div className="px-4 py-2 bg-green-100 text-green-700 rounded-xl text-sm font-medium flex items-center">
+                                                            Verified
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {verificationStatus === 'sent' && (
+                                                    <div className="mt-2 flex gap-2">
+                                                        <input
+                                                            type="text"
+                                                            value={verificationCode}
+                                                            onChange={(e) => setVerificationCode(e.target.value)}
+                                                            className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                                            placeholder="Enter 6-digit code"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={handleVerifyCode}
+                                                            disabled={isVerifying}
+                                                            className="px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-primary/90 disabled:opacity-50 whitespace-nowrap"
+                                                        >
+                                                            {isVerifying ? 'Checking...' : 'Submit'}
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {verificationMessage && (
+                                                    <p className={`text-xs mt-1 ${verificationStatus === 'verified' ? 'text-green-600' : 'text-slate-500'}`}>
+                                                        {verificationMessage}
+                                                    </p>
+                                                )}
                                             </div>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 <CustomSelect

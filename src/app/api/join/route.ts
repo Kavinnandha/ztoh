@@ -3,6 +3,8 @@ import dbConnect from '@/lib/db';
 import JoinRequest from '@/models/JoinRequest';
 import { Resend } from 'resend';
 import { verifyTurnstileToken } from '@/lib/turnstile';
+import Settings from '@/models/Settings';
+import { checkRateLimit } from '@/lib/rateLimit';
 
 export async function POST(request: Request) {
     try {
@@ -17,6 +19,14 @@ export async function POST(request: Request) {
             qualification, nationality, state, city, currentJobDetails, experience, subjectWillingToHandle, modeOfTutoring, workType,
             token
         } = body;
+
+        // Rate Limiting: 5 requests per hour per IP
+        const ip = request.headers.get('x-forwarded-for') || 'unknown';
+        const isAllowed = await checkRateLimit(`join_${ip}`, 5, 60 * 60 * 1000);
+
+        if (!isAllowed) {
+            return NextResponse.json({ success: false, error: 'Too many requests. Please try again later.' }, { status: 429 });
+        }
 
         // Verify Turnstile Token
         if (token) {
@@ -97,8 +107,9 @@ export async function POST(request: Request) {
                     .map(([key, value]) => `<p><strong>${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:</strong> ${value}</p>`)
                     .join('');
 
-                const adminEmail = process.env.ADMIN_EMAIL;
-                const fromEmail = process.env.FROM_EMAIL;
+                const settings = await Settings.findOne();
+                const adminEmail = settings?.emailSettings?.adminEmail || process.env.ADMIN_EMAIL;
+                const fromEmail = settings?.emailSettings?.fromEmail || process.env.FROM_EMAIL;
 
                 if (!adminEmail || !fromEmail) {
                     console.warn("ADMIN_EMAIL or FROM_EMAIL not set in .env");
