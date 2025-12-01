@@ -8,7 +8,8 @@ import Settings from '@/models/Settings';
 export async function POST(req: Request) {
     try {
         await connectDB();
-        const { email } = await req.json();
+        const body = await req.json();
+        const email = body.email?.trim();
 
         if (!email) {
             return NextResponse.json({ error: 'Email is required' }, { status: 400 });

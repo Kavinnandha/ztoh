@@ -6,7 +6,9 @@ import { checkRateLimit } from '@/lib/rateLimit';
 export async function POST(req: Request) {
     try {
         await connectDB();
-        const { email, code } = await req.json();
+        const body = await req.json();
+        const email = body.email?.trim();
+        const code = body.code?.trim();
 
         if (!email || !code) {
             return NextResponse.json({ error: 'Email and code are required' }, { status: 400 });

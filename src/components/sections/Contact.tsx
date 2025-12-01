@@ -45,7 +45,7 @@ export default function Contact() {
             const res = await fetch('/api/verify/send', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: formData.email }),
+                body: JSON.stringify({ email: formData.email.trim() }),
             });
             const data = await res.json();
             if (res.ok) {
@@ -72,7 +72,7 @@ export default function Contact() {
             const res = await fetch('/api/verify/check', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: formData.email, code: verificationCode }),
+                body: JSON.stringify({ email: formData.email.trim(), code: verificationCode.trim() }),
             });
             const data = await res.json();
             if (res.ok) {

@@ -129,7 +129,7 @@ export default function JoinUsModal({ isOpen, onClose }: JoinUsModalProps) {
             const res = await fetch('/api/verify/send', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email }),
+                body: JSON.stringify({ email: email.trim() }),
             });
             const data = await res.json();
             if (res.ok) {
@@ -156,7 +156,7 @@ export default function JoinUsModal({ isOpen, onClose }: JoinUsModalProps) {
             const res = await fetch('/api/verify/check', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, code: verificationCode }),
+                body: JSON.stringify({ email: email.trim(), code: verificationCode.trim() }),
             });
             const data = await res.json();
             if (res.ok) {
