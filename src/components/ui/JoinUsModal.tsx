@@ -184,6 +184,7 @@ export default function JoinUsModal({ isOpen, onClose }: JoinUsModalProps) {
                 <>
                     {/* Backdrop */}
                     <motion.div
+                        key="backdrop"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -192,6 +193,7 @@ export default function JoinUsModal({ isOpen, onClose }: JoinUsModalProps) {
 
                     {/* Sheet */}
                     <motion.div
+                        key="sheet"
                         initial={{ x: "100%" }}
                         animate={{ x: 0 }}
                         exit={{ x: "100%" }}
