@@ -99,7 +99,7 @@ export default function JoinUsModal({ isOpen, onClose }: JoinUsModalProps) {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ ...data, type: activeTab, token }),
+                body: JSON.stringify({ ...data, email, type: activeTab, token }),
             });
 
             const result = await response.json();
