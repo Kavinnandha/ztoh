@@ -127,7 +127,7 @@ export async function POST(request: Request) {
                         subject: `New ${type === 'student' ? 'Student' : 'Teacher'} Application: ${name}`,
                         html: `
                         <h3>New ${type === 'student' ? 'Student' : 'Teacher'} Application</h3>
-                        <p><strong>Tracking ID:</strong> ${joinRequest.trackingId}</p>
+                        <p><strong>Tracking Number:</strong> ${joinRequest.trackingId}</p>
                         <p><strong>Name:</strong> ${name}</p>
                         <p><strong>Email:</strong> ${email}</p>
                         <p><strong>Type:</strong> ${type}</p>
@@ -146,7 +146,7 @@ export async function POST(request: Request) {
                         <h3>Hi ${name},</h3>
                         <p>Thank you for applying to join <strong>Zero to Hero</strong> as a ${type}.</p>
                         <p>We have received your application and our team will review it shortly.</p>
-                        <p>Your tracking ID is: <strong>${joinRequest.trackingId}</strong></p>
+                        <p>Your tracking number is: <strong>${joinRequest.trackingId}</strong></p>
                         <br>
                         <p>Best regards,</p>
                         <p>The Zero to Hero Team</p>

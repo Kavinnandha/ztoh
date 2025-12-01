@@ -424,7 +424,7 @@ export default function RequestList({ activeTab, showToast }: RequestListProps) 
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                        <th className="px-6 py-4">ID</th>
+                                        <th className="px-6 py-4">Tracking No.</th>
                                         <th className="px-6 py-4">Name</th>
                                         <th className="px-6 py-4">Contact</th>
                                         {activeTab === 'join' && <th className="px-6 py-4">Type</th>}
@@ -608,7 +608,7 @@ export default function RequestList({ activeTab, showToast }: RequestListProps) 
                                 <div className="space-y-4">
                                     <h4 className="font-bold text-slate-900">Information</h4>
                                     <div className="grid grid-cols-3 gap-4 pb-4 border-b border-slate-50 last:border-0">
-                                        <span className="text-sm font-semibold text-slate-500 capitalize">Tracking ID</span>
+                                        <span className="text-sm font-semibold text-slate-500 capitalize">Tracking Number</span>
                                         <span className="col-span-2 text-sm text-slate-900 break-words font-mono bg-slate-50 px-2 py-1 rounded w-fit">
                                             {selectedRequest.trackingId || 'N/A'}
                                         </span>

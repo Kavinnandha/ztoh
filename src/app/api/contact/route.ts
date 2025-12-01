@@ -71,10 +71,10 @@ export async function POST(req: Request) {
                         from: `Zero To Hero <${fromEmail}>`,
                         to: adminEmail, // Admin email
                         subject: `New Contact Request from ${name}`,
-                        text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}\nTracking ID: ${newContactRequest.trackingId}`,
+                        text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}\nTracking Number: ${newContactRequest.trackingId}`,
                         html: `
                             <h3>New Contact Request</h3>
-                            <p><strong>Tracking ID:</strong> ${newContactRequest.trackingId}</p>
+                            <p><strong>Tracking Number:</strong> ${newContactRequest.trackingId}</p>
                             <p><strong>Name:</strong> ${name}</p>
                             <p><strong>Email:</strong> ${email}</p>
                             <p><strong>Message:</strong></p>
@@ -92,7 +92,7 @@ export async function POST(req: Request) {
                         <h3>Hi ${name},</h3>
                         <p>Thank you for contacting <strong>Zero to Hero</strong>.</p>
                         <p>We have received your message and will get back to you shortly.</p>
-                        <p>Your tracking ID is: <strong>${newContactRequest.trackingId}</strong></p>
+                        <p>Your tracking number is: <strong>${newContactRequest.trackingId}</strong></p>
                         <br>
                         <p>Best regards,</p>
                         <p>The Zero to Hero Team</p>
