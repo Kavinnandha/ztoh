@@ -81,7 +81,17 @@ export default function JoinUsModal({ isOpen, onClose }: JoinUsModalProps) {
         setError("");
 
         const formData = new FormData(e.currentTarget);
-        const data = Object.fromEntries(formData.entries());
+        const rawData = Object.fromEntries(formData.entries());
+
+        // Trim all string values
+        const data: Record<string, any> = {};
+        for (const [key, value] of Object.entries(rawData)) {
+            if (typeof value === 'string') {
+                data[key] = value.trim();
+            } else {
+                data[key] = value;
+            }
+        }
 
         try {
             const response = await fetch("/api/join", {
@@ -101,6 +111,8 @@ export default function JoinUsModal({ isOpen, onClose }: JoinUsModalProps) {
             setIsSuccess(true);
         } catch (err: any) {
             setError(err.message || "Something went wrong. Please try again.");
+            turnstileRef.current?.reset();
+            setToken(null);
         } finally {
             setIsSubmitting(false);
         }

@@ -103,13 +103,19 @@ export default function Contact() {
 
         setStatus('loading');
 
+        const trimmedData = {
+            name: formData.name.trim(),
+            email: formData.email.trim(),
+            message: formData.message.trim()
+        };
+
         try {
             const response = await fetch('/api/contact', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ ...formData, token }),
+                body: JSON.stringify({ ...trimmedData, token }),
             });
 
             if (response.ok) {
@@ -122,10 +128,17 @@ export default function Contact() {
                 setVerificationMessage('');
                 setTimeout(() => setStatus('idle'), 3000);
             } else {
+                const data = await response.json();
+                addToast(data.error || "Failed to send message", "error");
                 setStatus('error');
+                turnstileRef.current?.reset();
+                setToken(null);
             }
         } catch (error) {
             setStatus('error');
+            addToast("Something went wrong", "error");
+            turnstileRef.current?.reset();
+            setToken(null);
         }
     };
 
