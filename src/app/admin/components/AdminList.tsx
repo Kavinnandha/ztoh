@@ -178,43 +178,77 @@ export default function AdminList({ triggerAddAdmin, onAddAdminClosed }: AdminLi
 
     return (
         <>
-            <table className="w-full text-left border-collapse">
-                <thead>
-                    <tr className="bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                        <th className="px-6 py-4">Name</th>
-                        <th className="px-6 py-4">Email</th>
-                        <th className="px-6 py-4">Created At</th>
-                        <th className="px-6 py-4 text-right">Actions</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                    {admins.map((admin) => (
-                        <tr key={admin._id} className="hover:bg-slate-50/50 transition-colors group">
-                            <td className="px-6 py-4 font-semibold text-slate-900">{admin.name}</td>
-                            <td className="px-6 py-4 text-sm text-slate-600">{admin.email}</td>
-                            <td className="px-6 py-4 text-sm text-slate-500">{formatDate(admin.createdAt)}</td>
-                            <td className="px-6 py-4 text-right">
-                                <div className="flex items-center justify-end gap-2 transition-opacity">
-                                    <button
-                                        onClick={() => openEditAdminModal(admin)}
-                                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                        title="Edit"
-                                    >
-                                        <MoreVertical size={18} />
-                                    </button>
-                                    <button
-                                        onClick={() => openDeleteAdminModal(admin)}
-                                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                        title="Delete"
-                                    >
-                                        <Trash2 size={18} />
-                                    </button>
-                                </div>
-                            </td>
+            {/* Desktop View */}
+            <div className="hidden md:block">
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                        <tr className="bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                            <th className="px-6 py-4">Name</th>
+                            <th className="px-6 py-4">Email</th>
+                            <th className="px-6 py-4">Created At</th>
+                            <th className="px-6 py-4 text-right">Actions</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        {admins.map((admin) => (
+                            <tr key={admin._id} className="hover:bg-slate-50/50 transition-colors group">
+                                <td className="px-6 py-4 font-semibold text-slate-900">{admin.name}</td>
+                                <td className="px-6 py-4 text-sm text-slate-600">{admin.email}</td>
+                                <td className="px-6 py-4 text-sm text-slate-500">{formatDate(admin.createdAt)}</td>
+                                <td className="px-6 py-4 text-right">
+                                    <div className="flex items-center justify-end gap-2 transition-opacity">
+                                        <button
+                                            onClick={() => openEditAdminModal(admin)}
+                                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                            title="Edit"
+                                        >
+                                            <MoreVertical size={18} />
+                                        </button>
+                                        <button
+                                            onClick={() => openDeleteAdminModal(admin)}
+                                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                            title="Delete"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Mobile View */}
+            <div className="md:hidden space-y-4">
+                {admins.map((admin) => (
+                    <div key={admin._id} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm space-y-3">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <h3 className="font-semibold text-slate-900">{admin.name}</h3>
+                                <p className="text-sm text-slate-600">{admin.email}</p>
+                            </div>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => openEditAdminModal(admin)}
+                                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                >
+                                    <MoreVertical size={18} />
+                                </button>
+                                <button
+                                    onClick={() => openDeleteAdminModal(admin)}
+                                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="text-xs text-slate-400 text-right">
+                            Created: {formatDate(admin.createdAt)}
+                        </div>
+                    </div>
+                ))}
+            </div>
 
             {/* Add Admin Modal */}
             {showAddAdminModal && (

@@ -4,6 +4,7 @@ export interface IContactRequest extends Document {
     name: string;
     email: string;
     message: string;
+    trackingId: string;
     status: 'pending' | 'accepted' | 'declined';
     teleCallingStatus: 'pending' | 'called' | 'no_answer' | 'follow_up_needed' | 'converted' | 'not_interested';
     notes: { content: string; createdAt: Date }[];
@@ -15,6 +16,7 @@ const ContactRequestSchema: Schema = new Schema({
     name: { type: String, required: true },
     email: { type: String, required: true },
     message: { type: String, required: true },
+    trackingId: { type: String, unique: true },
     status: {
         type: String,
         enum: ['pending', 'accepted', 'declined'],

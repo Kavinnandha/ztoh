@@ -5,6 +5,7 @@ import { Resend } from 'resend';
 import { verifyTurnstileToken } from '@/lib/turnstile';
 import Settings from '@/models/Settings';
 import { checkRateLimit } from '@/lib/rateLimit';
+import { generateTrackingId } from '@/lib/utils';
 
 export async function POST(request: Request) {
     try {
@@ -94,7 +95,11 @@ export async function POST(request: Request) {
             }
         }
 
-        const joinRequest = await JoinRequest.create(body);
+        const joinRequest = new JoinRequest({
+            ...body,
+            trackingId: generateTrackingId('join')
+        });
+        await joinRequest.save();
 
         // Send email notification
         if (process.env.RESEND_API_KEY) {
@@ -122,6 +127,7 @@ export async function POST(request: Request) {
                         subject: `New ${type === 'student' ? 'Student' : 'Teacher'} Application: ${name}`,
                         html: `
                         <h3>New ${type === 'student' ? 'Student' : 'Teacher'} Application</h3>
+                        <p><strong>Tracking ID:</strong> ${joinRequest.trackingId}</p>
                         <p><strong>Name:</strong> ${name}</p>
                         <p><strong>Email:</strong> ${email}</p>
                         <p><strong>Type:</strong> ${type}</p>
@@ -140,6 +146,7 @@ export async function POST(request: Request) {
                         <h3>Hi ${name},</h3>
                         <p>Thank you for applying to join <strong>Zero to Hero</strong> as a ${type}.</p>
                         <p>We have received your application and our team will review it shortly.</p>
+                        <p>Your tracking ID is: <strong>${joinRequest.trackingId}</strong></p>
                         <br>
                         <p>Best regards,</p>
                         <p>The Zero to Hero Team</p>

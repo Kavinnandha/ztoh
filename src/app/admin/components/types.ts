@@ -8,6 +8,7 @@ export interface ContactRequest {
     notes: { content: string; createdAt: string }[];
     history: { action: string; details: string; performedBy: string; timestamp: string }[];
     createdAt: string;
+    trackingId?: string;
 }
 
 export interface JoinRequest {
@@ -21,6 +22,7 @@ export interface JoinRequest {
     notes: { content: string; createdAt: string }[];
     history: { action: string; details: string; performedBy: string; timestamp: string }[];
     createdAt: string;
+    trackingId?: string;
     [key: string]: any;
 }
 

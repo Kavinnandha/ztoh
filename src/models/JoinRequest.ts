@@ -35,6 +35,7 @@ export interface IJoinRequest extends Document {
     history: { action: string; details: string; performedBy: string; timestamp: Date }[];
 
     createdAt: Date;
+    trackingId: string;
 }
 
 const JoinRequestSchema: Schema = new Schema({
@@ -44,6 +45,7 @@ const JoinRequestSchema: Schema = new Schema({
     gender: { type: String, required: true },
     mobile: { type: String, required: true },
     address: { type: String, required: true },
+    trackingId: { type: String, unique: true },
 
     // Student
     applyingAs: { type: String },

@@ -285,6 +285,7 @@ export default function RequestList({ activeTab, showToast }: RequestListProps) 
             filtered = filtered.filter(req =>
                 req.name?.toLowerCase().includes(lowerTerm) ||
                 req.email?.toLowerCase().includes(lowerTerm) ||
+                req.trackingId?.toLowerCase().includes(lowerTerm) ||
                 ((req as any).mobile && (req as any).mobile.includes(lowerTerm))
             );
         }
@@ -417,70 +418,131 @@ export default function RequestList({ activeTab, showToast }: RequestListProps) 
                         No requests found matching your criteria.
                     </div>
                 ) : (
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                <th className="px-6 py-4">Name</th>
-                                <th className="px-6 py-4">Contact</th>
-                                {activeTab === 'join' && <th className="px-6 py-4">Type</th>}
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4">Date</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
+                    <>
+                        {/* Desktop View */}
+                        <div className="hidden md:block">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                        <th className="px-6 py-4">ID</th>
+                                        <th className="px-6 py-4">Name</th>
+                                        <th className="px-6 py-4">Contact</th>
+                                        {activeTab === 'join' && <th className="px-6 py-4">Type</th>}
+                                        <th className="px-6 py-4">Status</th>
+                                        <th className="px-6 py-4">Date</th>
+                                        <th className="px-6 py-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {displayedRequests.map((request) => (
+                                        <tr key={request._id} className="hover:bg-slate-50/50 transition-colors group">
+                                            <td className="px-6 py-4">
+                                                <span className="font-mono text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">{request.trackingId || '-'}</span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="font-semibold text-slate-900">{request.name}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="text-sm text-slate-600">{request.email}</div>
+                                                {(request as any).mobile && <div className="text-xs text-slate-400 mt-0.5">{(request as any).mobile}</div>}
+                                            </td>
+                                            {activeTab === 'join' && (
+                                                <td className="px-6 py-4">
+                                                    <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${(request as JoinRequest).type === 'teacher'
+                                                        ? 'bg-purple-100 text-purple-700'
+                                                        : 'bg-blue-100 text-blue-700'
+                                                        }`}>
+                                                        {(request as JoinRequest).type}
+                                                    </span>
+                                                </td>
+                                            )}
+                                            <td className="px-6 py-4">
+                                                <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${request.status === 'accepted' ? 'bg-green-100 text-green-700' :
+                                                    request.status === 'declined' ? 'bg-red-100 text-red-700' :
+                                                        'bg-yellow-100 text-yellow-700'
+                                                    }`}>
+                                                    {request.status || 'pending'}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-slate-500">
+                                                {formatDate(request.createdAt)}
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="flex items-center justify-end gap-2 transition-opacity">
+                                                    <button
+                                                        onClick={() => setSelectedRequest(request)}
+                                                        className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                                                        title="View Details"
+                                                    >
+                                                        <Eye size={18} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => openDeleteModal(request)}
+                                                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                        title="Delete"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Mobile View */}
+                        <div className="md:hidden space-y-4">
                             {displayedRequests.map((request) => (
-                                <tr key={request._id} className="hover:bg-slate-50/50 transition-colors group">
-                                    <td className="px-6 py-4">
-                                        <div className="font-semibold text-slate-900">{request.name}</div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="text-sm text-slate-600">{request.email}</div>
-                                        {(request as any).mobile && <div className="text-xs text-slate-400 mt-0.5">{(request as any).mobile}</div>}
-                                    </td>
-                                    {activeTab === 'join' && (
-                                        <td className="px-6 py-4">
-                                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${(request as JoinRequest).type === 'teacher'
-                                                ? 'bg-purple-100 text-purple-700'
-                                                : 'bg-blue-100 text-blue-700'
-                                                }`}>
-                                                {(request as JoinRequest).type}
-                                            </span>
-                                        </td>
-                                    )}
-                                    <td className="px-6 py-4">
-                                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${request.status === 'accepted' ? 'bg-green-100 text-green-700' :
-                                            request.status === 'declined' ? 'bg-red-100 text-red-700' :
-                                                'bg-yellow-100 text-yellow-700'
-                                            }`}>
-                                            {request.status || 'pending'}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-slate-500">
-                                        {formatDate(request.createdAt)}
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2 transition-opacity">
+                                <div key={request._id} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm space-y-3">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="font-mono text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">{request.trackingId || '-'}</span>
+                                                <h3 className="font-semibold text-slate-900">{request.name}</h3>
+                                            </div>
+                                            <p className="text-sm text-slate-500">{request.email}</p>
+                                            {(request as any).mobile && <p className="text-xs text-slate-400">{(request as any).mobile}</p>}
+                                        </div>
+                                        <div className="flex gap-2">
                                             <button
                                                 onClick={() => setSelectedRequest(request)}
                                                 className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
-                                                title="View Details"
                                             >
                                                 <Eye size={18} />
                                             </button>
                                             <button
                                                 onClick={() => openDeleteModal(request)}
                                                 className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                                title="Delete"
                                             >
                                                 <Trash2 size={18} />
                                             </button>
                                         </div>
-                                    </td>
-                                </tr>
+                                    </div>
+
+                                    <div className="flex flex-wrap gap-2 items-center text-xs">
+                                        {activeTab === 'join' && (
+                                            <span className={`px-2 py-0.5 rounded-full font-bold uppercase tracking-wide ${(request as JoinRequest).type === 'teacher'
+                                                ? 'bg-purple-100 text-purple-700'
+                                                : 'bg-blue-100 text-blue-700'
+                                                }`}>
+                                                {(request as JoinRequest).type}
+                                            </span>
+                                        )}
+                                        <span className={`px-2 py-0.5 rounded-full font-bold uppercase tracking-wide ${request.status === 'accepted' ? 'bg-green-100 text-green-700' :
+                                            request.status === 'declined' ? 'bg-red-100 text-red-700' :
+                                                'bg-yellow-100 text-yellow-700'
+                                            }`}>
+                                            {request.status || 'pending'}
+                                        </span>
+                                        <span className="text-slate-400 ml-auto">
+                                            {formatDate(request.createdAt)}
+                                        </span>
+                                    </div>
+                                </div>
                             ))}
-                        </tbody>
-                    </table>
+                        </div>
+                    </>
                 )}
             </div>
 
@@ -545,8 +607,14 @@ export default function RequestList({ activeTab, showToast }: RequestListProps) 
                                 {/* Data Fields */}
                                 <div className="space-y-4">
                                     <h4 className="font-bold text-slate-900">Information</h4>
+                                    <div className="grid grid-cols-3 gap-4 pb-4 border-b border-slate-50 last:border-0">
+                                        <span className="text-sm font-semibold text-slate-500 capitalize">Tracking ID</span>
+                                        <span className="col-span-2 text-sm text-slate-900 break-words font-mono bg-slate-50 px-2 py-1 rounded w-fit">
+                                            {selectedRequest.trackingId || 'N/A'}
+                                        </span>
+                                    </div>
                                     {Object.entries(selectedRequest).map(([key, value]) => {
-                                        if (['_id', '__v', 'updatedAt', 'status', 'teleCallingStatus', 'notes', 'history'].includes(key)) return null;
+                                        if (['_id', '__v', 'updatedAt', 'status', 'teleCallingStatus', 'notes', 'history', 'trackingId'].includes(key)) return null;
                                         return (
                                             <div key={key} className="grid grid-cols-3 gap-4 pb-4 border-b border-slate-50 last:border-0">
                                                 <span className="text-sm font-semibold text-slate-500 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
