@@ -317,6 +317,7 @@ export default function Contact() {
                                     ref={turnstileRef}
                                     siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""}
                                     onSuccess={setToken}
+                                    injectScript={false}
                                     options={{
                                         theme: 'light',
                                     }}
