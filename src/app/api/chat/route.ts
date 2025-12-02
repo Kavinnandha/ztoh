@@ -19,19 +19,32 @@ export async function POST(req: Request) {
         const lastMessage = messages[messages.length - 1];
         const userQuestion = lastMessage.content;
 
+        // UPDATED PROMPT HERE
         const prompt = `
       You are a helpful AI assistant for a website.
-      The user is currently viewing a page with the following content:
-      
+      You are answering questions based *only* on the provided page content below.
+
       ---
       ${pageContent}
       ---
       
       User Question: ${userQuestion}
       
-      Answer the user's question based on the page content provided above. 
-      If the answer is not in the page content, you can use your general knowledge but mention that it's not explicitly on the page.
-      Keep your answer concise and helpful.
+      **INSTRUCTIONS:**
+      1. **Search:** Check if the answer exists in the content above.
+      2. **Found:** If the answer is present, answer clearly.
+      3. **Not Found:** If the answer is NOT in the content, **do not** say "it is not mentioned" or "I don't know". 
+         Instead, follow this strict format:
+         
+         a) Extract the **core topic** from the user's question (e.g., convert "what is the course timing?" to "course timing").
+         b) Find the phone number and email in the text.
+         c) Output the response using this exact template:
+            "Please contact us directly on [Phone] or [Email] for details about [Topic]."
+
+      **Example of Not Found Behavior:**
+      - User asks: "What are the fees?"
+      - Content: (Fees are missing, but phone is 555-0199)
+      - Your Answer: "Please contact us directly on 555-0199 for details about the fees."
     `;
 
         const result = await model.generateContent(prompt);

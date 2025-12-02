@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -12,6 +13,7 @@ interface Message {
 }
 
 export default function Chatbot() {
+    const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
         { role: "assistant", content: "Hi! I can answer questions about this page. What would you like to know?" },
@@ -65,6 +67,10 @@ export default function Chatbot() {
         }
     };
 
+
+
+    if (pathname?.startsWith("/admin")) return null;
+
     return (
         <>
             <AnimatePresence>
@@ -74,13 +80,13 @@ export default function Chatbot() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
                         transition={{ duration: 0.2 }}
-                        className="fixed bottom-20 right-4 z-50 w-[350px] md:w-[400px] h-[500px] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden"
+                        className="fixed bottom-20 left-4 right-4 md:left-auto md:right-4 z-50 w-auto md:w-[400px] h-[60vh] min-h-[400px] max-h-[600px] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden"
                     >
                         {/* Header */}
                         <div className="bg-slate-900 p-4 flex items-center justify-between text-white">
                             <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                                <h3 className="font-semibold">Page Assistant</h3>
+                                <h3 className="font-semibold">Assistant</h3>
                             </div>
                             <button
                                 onClick={() => setIsOpen(false)}
