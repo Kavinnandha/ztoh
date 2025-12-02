@@ -31,9 +31,13 @@ export async function POST(req: Request) {
       User Question: ${userQuestion}
       
       **INSTRUCTIONS:**
-      1. **Search:** Check if the answer exists in the content above.
-      2. **Found:** If the answer is present, answer clearly.
-      3. **Not Found:** If the answer is NOT in the content, **do not** say "it is not mentioned" or "I don't know". 
+      1. **Analyze the Input:**
+         - If the user input is a **greeting** (e.g., "hi", "hello", "good morning") or **small talk** (e.g., "how are you?"), answer politely and naturally. **Do not** use the "Contact us" fallback for these.
+         - If the user asks a specific question, check if the answer exists in the content above.
+      
+      2. **Found:** If the answer is present in the content, answer clearly.
+      
+      3. **Not Found:** If the answer is NOT in the content and it is NOT a greeting/small talk, **do not** say "it is not mentioned" or "I don't know". 
          Instead, follow this strict format:
          
          a) Extract the **core topic** from the user's question (e.g., convert "what is the course timing?" to "course timing").
@@ -41,10 +45,12 @@ export async function POST(req: Request) {
          c) Output the response using this exact template:
             "Please contact us directly on [Phone] or [Email] for details about [Topic]."
 
-      **Example of Not Found Behavior:**
-      - User asks: "What are the fees?"
-      - Content: (Fees are missing, but phone is 555-0199)
-      - Your Answer: "Please contact us directly on 555-0199 for details about the fees."
+      **Examples:**
+      - User: "Hello"
+        Assistant: "Hello! How can I help you today?"
+      
+      - User: "What are the fees?" (and fees are missing from content)
+        Assistant: "Please contact us directly on +91 95643 21000 or mathsmuthu.j@gmail.com for details about the fees."
     `;
 
         const result = await model.generateContent(prompt);
