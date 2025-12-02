@@ -45,7 +45,7 @@ export default function RootLayout({
             <Chatbot />
           </ModalProvider>
         </ToastProvider>
-        <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="lazyOnload" />
+
       </body>
     </html>
   );
