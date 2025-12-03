@@ -86,7 +86,7 @@ export default function Chatbot() {
                         <div className="bg-slate-900 p-4 flex items-center justify-between text-white">
                             <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                                <h3 className="font-semibold">Assistant</h3>
+                                <h3 className="font-semibold">AI Assistant</h3>
                             </div>
                             <button
                                 onClick={() => setIsOpen(false)}

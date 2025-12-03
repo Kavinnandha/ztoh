@@ -8,7 +8,7 @@ import ScrollAnimation from "@/components/animations/ScrollAnimation";
 const faqs = [
     {
         question: "How to enroll in the courses?",
-        answer: "You can enroll in the courses through the provided link. Click here to register."
+        answer: "You can enroll in the courses by clicking on the join us or get started button."
     },
     {
         question: "Are the demo classes free of cost?",

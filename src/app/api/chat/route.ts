@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
     const lastMessage = messages[messages.length - 1];
     const userQuestion = lastMessage.content;
@@ -22,26 +22,24 @@ export async function POST(req: Request) {
     // UPDATED PROMPT HERE
     const prompt = `
       You are a helpful AI assistant for a website.
+
       The user is currently viewing a page with the following content:
-      
       ---
       ${pageContent}
       ---
-      
+
       User Question: ${userQuestion}
-      
+
       INSTRUCTIONS:
-      - Answer the user's question using ONLY the information available in the page content.
-      - If the requested information is not present on the page, provide a positive and helpful redirection.
-      - Do NOT use negative phrases like "I am unable to", "not available", or "cannot find".
-      - Instead, confidently guide the user with phrases like:
+      - Answer the user's question using ONLY the information available in the provided content.
+      - Do NOT say phrases like "the page mentions", "the page contains", "according to the page", etc.
+      - Speak as if you represent us (the website/organization). Use "we" instead.
+      - If the requested information is not provided in the content, give a positive and helpful redirection such as:
           • "For details on this, please contact us at ..."
           • "You can get complete information by reaching out to ..."
-      
-      Keep your response concise, friendly, and helpful.
+      - Do NOT use any negative phrasing like "I am unable to find" or "this information is not available".
+      - Keep the response concise, friendly, and helpful.
 `;
-
-
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
