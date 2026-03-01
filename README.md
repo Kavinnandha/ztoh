@@ -1,6 +1,6 @@
 # ZTOH - Web Application
 
-A modern, responsive web application for ZTOH (Zero to One Hundred), featuring a dynamic frontend and a robust admin dashboard for managing requests and administrators.
+A modern, responsive web application for ZTOH (Zero to Hero), featuring a dynamic frontend and a robust admin dashboard for managing requests and administrators.
 
 ## 🚀 Features
 
